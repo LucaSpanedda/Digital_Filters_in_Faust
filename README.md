@@ -530,7 +530,7 @@ BPBiquad(g, q, f) = biquadFilter : _ * g
         b2 = (1 - K / Q + K * K) * norm;
     };
 
-//process = _ : BPBiquad(4, 10000, 4000);
+process = _ : BPBiquad(4, 10000, 4000);
 ```
 
 ### Vadim Zavalishin's SVF TPT
