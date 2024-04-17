@@ -347,7 +347,6 @@ responses, nice time-varying behavior and plenty of options for nonlinearities
     and one without delay, ```_``` (```,``` denotes transition to the second path)
     they are then summed into a single signal ```:> _ ;```
 
-
 the delayed signal has a feedforward amplitude control ```* feedforward```
 
 there is a general amplitude control ```* outgain```
@@ -466,3 +465,34 @@ import("stdfaust.lib");
      }; 
  process = 1-1' : +@(ma.SR/100) ~ _ <: _, ModAPF(1000, 500, .12, .5); 
 ```
+
+### STATE VARIABLE FILTER (SVF)
+
+State variable filters are second-order RC active filters consisting of two identical op-amp integrators with each one acting as a first-order, single-pole low pass filter, a summing amplifier around which we can set the filters gain and its damping feedback network. The output signals from all three op-amp stages are fed back to the input allowing us to define the state of the circuit.
+
+The state variable filter is a type of multiple-feedback filter circuit that can produce all three filter responses, Low Pass, High Pass and Band Pass simultaneously from the same single active filter design, and derivation like Notch, Peak, Allpass...
+
+These filter transfer functions were derived from analog prototypes (that
+are shown below for each EQ filter type) and had been digitized using the
+Bilinear Transform by Robert Bristow-Johnson.  
+
+```
+// Robert Bristow-Johnson's Biquad Filter - Direct Form 1
+BPBiquad(g, q, f) = biquadFilter : _ * g
+    with{
+        biquadFilter = _ <: _, (mem  <: (_, mem)) : (_ * a0, _ * a1, _ * a2) :> _ : 
+                            ((_, _) :> _) ~ (_ <: (_, mem) : (_ * -b1, _ * -b2) :> _);
+        F = max(ma.EPSILON, min(20000,  f));
+        Q = max(ma.EPSILON, min(ma.MAX, q));
+        K = tan(ma.PI * F / ma.SR);
+        norm = 1 / (1 + K / Q + K * K);
+        a0 = K / Q * norm;
+        a1 = 0;
+        a2 = -a0;
+        b1 = 2 * (K * K - 1) * norm;
+        b2 = (1 - K / Q + K * K) * norm;
+    };
+
+//process = no.noise <: BPTPTNormalized(4, 1000, 4000), BPTPTOptimized(.01, 1, 4000), BPBiquad(4, 10000, 4000), BPSVFTPT(1000, 4000) * 4;
+```
+
