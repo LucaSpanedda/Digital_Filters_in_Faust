@@ -475,9 +475,11 @@ State variable filters are second-order RC active filters consisting of two iden
 
 The state variable filter is a type of multiple-feedback filter circuit that can produce all three filter responses, Low Pass, High Pass and Band Pass simultaneously from the same single active filter design, and derivation like Notch, Peak, Allpass...
 
-These filter transfer functions were derived from analog prototypes (that
+### Robert Bristow Johnson's SVF Bandpass
+
+This filter transfer functions were derived from analog prototypes (that
 are shown below for each EQ filter type) and had been digitized using the
-Bilinear Transform by Robert Bristow-Johnson.  
+Bilinear Transform by Robert Bristow-Johnson: https://webaudio.github.io/Audio-EQ-Cookbook/audio-eq-cookbook.html
 
 ```
 // Robert Bristow-Johnson's Biquad Filter - Direct Form 1
@@ -493,9 +495,45 @@ BPBiquad(g, q, f) = biquadFilter : _ * g
         a1 = 0;
         a2 = -a0;
         b1 = 2 * (K * K - 1) * norm;
+
+### Robert Bristow Johnson's SVF Bandpass
         b2 = (1 - K / Q + K * K) * norm;
     };
 
-//process = no.noise <: BPTPTNormalized(4, 1000, 4000), BPTPTOptimized(.01, 1, 4000), BPBiquad(4, 10000, 4000), BPSVFTPT(1000, 4000) * 4;
+//process = _ : BPBiquad(4, 10000, 4000);
 ```
 
+### Vadim Zavalishin's SVF TPT
+
+```
+// Vadim Zavalishin's SVF TPT filter (Topology Preserving Transform)
+SVFTPT(Q, cf, x) = loop ~ si.bus(2) : (! , ! , _ , _ , _ , _ , _)
+    with {
+        g = tan(cf * ma.PI * ma.T);
+        R = 1.0 / (2.0 * Q);
+        G1 = 1.0 / (1.0 + 2.0 * R * g + g * g);
+        G2 = 2.0 * R + g;
+        loop(s1, s2) = u1 , u2 , lp , hp , bp * 2.0 * R , x - bp * 4.0 * R , bp
+            with {
+                hp = (x - s1 * G2 - s2) * G1;
+                v1 = hp * g;
+                bp = s1 + v1;
+                v2 = bp * g;
+                lp = s2 + v2;
+                u1 = v1 + bp;
+                u2 = v2 + lp;
+            };
+    };
+
+// HP - LP SVF 
+LPSVFTPT(Q, cf, x) = SVFTPT(Q, cf, x) : (_ , ! , ! , ! , !);
+HPSVFTPT(Q, cf, x) = SVFTPT(Q, cf, x) : (! , _ , ! , ! , !);
+
+// Normalized Bandpass SVF 
+BPSVFTPT(Q, cf, x) = SVFTPT(Q, cf, x) : (! , ! , _ , ! , !);
+
+NotchSVFTPT(Q, cf, x) = x - BPSVF(Q, cf, x);
+APSVFTPT(Q, cf, x) = SVFTPT(Q, cf, x) : (! , ! , ! , _ , !);
+PeakingSVFTPT(Q, cf, x) = LPSVF(Q, cf, x) - HPSVF(Q, cf, x);
+BP2SVFTPT(Q, cf, x) = SVFTPT(Q, cf, x) : (! , ! , ! , ! , _);
+```
