@@ -295,6 +295,18 @@ process =   _ :
 ```
 // import Standard Faust library 
 // https://github.com/grame-cncm/faustlibraries/ 
+import("stdfaust.lib");
+
+// (g) = give amplitude 1-0(open-close) for the lowpass cut
+opf(g, x) = x * g : + ~ (_ : * (1 - g));
+process = _ : opf(0.1);
+```
+
+and OPF with a Frequency Cut transfer function:
+
+```
+// import Standard Faust library 
+// https://github.com/grame-cncm/faustlibraries/ 
 import("stdfaust.lib"); 
   
  // (G)  = give amplitude 1-0 (open-close) for the lowpass cut 
@@ -302,11 +314,29 @@ import("stdfaust.lib");
  OPF(CF,x) = OPFFBcircuit ~ _  
      with{ 
          g(x) = x / (1.0 + x); 
-         G = tan(CF * ma.PI / ma.SR):g; 
-         OPFFBcircuit(y) = x*G+(y*(1-G)); 
+         G = g(tan(CF * ma.PI / ma.SR)); 
+         OPFFBcircuit(y) = x * G + (y * (1 - G)); 
          }; 
   
- process = OPF(20000) <: si.bus(2);
+ process = _ : OPF(20000) <: si.bus(2);
+```
+same OPF with Formulae expressed in Seconds
+
+```
+// import Standard Faust library 
+// https://github.com/grame-cncm/faustlibraries/ 
+import("stdfaust.lib"); 
+  
+ // (G)  = give amplitude 1-0 (open-close) for the lowpass cut 
+ // (T) = Frequency in Seconds
+ OPF(T, x) = OPFFBcircuit ~ _  
+     with{ 
+         g(x) = x / (1.0 + x); 
+         G = g(tan((1 / T) * ma.PI / ma.SR)); 
+         OPFFBcircuit(y) = x * G + (y * (1 - G)); 
+         }; 
+  
+ process = _ : OPF(10) <: si.bus(2);
 ```
 
 ### ONEPOLE Topology Preserving Transforms (TPT)
