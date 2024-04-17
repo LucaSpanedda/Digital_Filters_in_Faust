@@ -476,7 +476,7 @@ import("stdfaust.lib");
  process = _ * .1 <: apf(100, .5); 
 ```
 
-### Modulated ALLPASS FILTER
+### MODULATED ALLPASS FILTER
 
 Allpass Filter with Time-Variant delay
 
