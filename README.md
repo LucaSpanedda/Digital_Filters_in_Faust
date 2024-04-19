@@ -66,15 +66,21 @@ Now we will illustrate 3 main methods for Implementing Recursive Circuits in the
   exit from the with, with ```~ _```
   
   Example:
-  
-      function_with(argument1, argument2) = out ~ _
+```
+ // import Standard Faust library 
+ // https://github.com/grame-cncm/faustlibraries/ 
+ import("stdfaust.lib"); 
+
+//where out ~ _ returns to itself.
+function_with(input1, input2) = out ~ _
        	with{  
-        		section1 = _ * argument1;
-        		section2 = argument1 * argument2;
+        		section1 = 2 * input1;
+        		section2(argument1) = argument1 * section1 + input2;
         		out = section2;
         	};
-      
-        where out ~ _ returns to itself.
+        	
+process = function_with(0.40, 2);
+```
 
 Moreover, with in Faust allows declaring variables
 that are not pointed to from outside the code but only
@@ -512,6 +518,10 @@ are shown below for each EQ filter type) and had been digitized using the
 Bilinear Transform by Robert Bristow-Johnson: https://webaudio.github.io/Audio-EQ-Cookbook/audio-eq-cookbook.html
 
 ```
+// import Standard Faust library 
+// https://github.com/grame-cncm/faustlibraries/ 
+import("stdfaust.lib"); 
+
 // Robert Bristow-Johnson's Biquad Filter - Direct Form 1
 BPBiquad(g, q, f) = biquadFilter : _ * g
     with{
@@ -525,8 +535,6 @@ BPBiquad(g, q, f) = biquadFilter : _ * g
         a1 = 0;
         a2 = -a0;
         b1 = 2 * (K * K - 1) * norm;
-
-### Robert Bristow Johnson's SVF Bandpass
         b2 = (1 - K / Q + K * K) * norm;
     };
 
@@ -536,6 +544,10 @@ process = _ : BPBiquad(4, 10000, 4000);
 ### Vadim Zavalishin's SVF TPT
 
 ```
+s// import Standard Faust library 
+// https://github.com/grame-cncm/faustlibraries/ 
+import("stdfaust.lib"); 
+
 // Vadim Zavalishin's SVF TPT filter (Topology Preserving Transform)
 SVFTPT(Q, cf, x) = loop ~ si.bus(2) : (! , ! , _ , _ , _ , _ , _)
     with {
@@ -561,6 +573,7 @@ HPSVFTPT(Q, cf, x) = SVFTPT(Q, cf, x) : (! , _ , ! , ! , !);
 
 // Normalized Bandpass SVF 
 BPSVFTPT(Q, cf, x) = SVFTPT(Q, cf, x) : (! , ! , _ , ! , !);
+process = BPSVFTPT(1, 1000);
 
 NotchSVFTPT(Q, cf, x) = x - BPSVF(Q, cf, x);
 APSVFTPT(Q, cf, x) = SVFTPT(Q, cf, x) : (! , ! , ! , _ , !);
