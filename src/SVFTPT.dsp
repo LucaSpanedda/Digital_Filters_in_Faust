@@ -1,7 +1,3 @@
-// import Standard Faust library 
-// https://github.com/grame-cncm/faustlibraries/ 
-import("stdfaust.lib"); 
-
 // Vadim Zavalishin's SVF TPT filter (Topology Preserving Transform)
 SVFTPT(Q, cf, x) = loop ~ si.bus(2) : (! , ! , _ , _ , _ , _ , _)
     with {
@@ -27,9 +23,11 @@ HPSVFTPT(Q, cf, x) = SVFTPT(Q, cf, x) : (! , _ , ! , ! , !);
 
 // Normalized Bandpass SVF 
 BPSVFTPT(Q, cf, x) = SVFTPT(Q, cf, x) : (! , ! , _ , ! , !);
-process = BPSVFTPT(1, 1000);
 
 NotchSVFTPT(Q, cf, x) = x - BPSVF(Q, cf, x);
 APSVFTPT(Q, cf, x) = SVFTPT(Q, cf, x) : (! , ! , ! , _ , !);
 PeakingSVFTPT(Q, cf, x) = LPSVF(Q, cf, x) - HPSVF(Q, cf, x);
 BP2SVFTPT(Q, cf, x) = SVFTPT(Q, cf, x) : (! , ! , ! , ! , _);
+
+// Bandpass Bandwidth SVF (danger = division for 0)
+BPBWSVFTPT(BW, CF, x) = BPSVF((CF / BW), CF, x);
