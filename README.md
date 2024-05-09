@@ -4,10 +4,17 @@
 
 ### Preludes to Filter Syntax in Faust
 In FAUST the ```_``` represent a signal input.
-A function with one input that goes directly to the output is written as follows: ```process = _;``` where
-```process``` is the main function in Faust (the compiler's output function)
+A function with one input that goes directly to the output is written as follows: 
+```
+ // import Standard Faust library 
+ // https://github.com/grame-cncm/faustlibraries/ 
+ import("stdfaust.lib");
+ process = _;
+```
+where
+```process``` is the **main** function in Faust (the compiler's output function)
 
-Delay lines in Faust are divided into the following categories:
+Faust provides us with three different syntaxes to express a delay line:
 
 - ```mem``` - indicates a single sample delay.
 
