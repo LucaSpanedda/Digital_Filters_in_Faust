@@ -25,7 +25,9 @@ Faust provides us with three different syntaxes to express a delay line:
 ```
 will produce a delayed signal of three samples.
 
-- ```mem``` - indicates a single sample delay.
+---
+
+- ```mem``` - indicates a 1 sample delay.
 
 - ```@``` - indicates a number of variable delay samples.
 (ex. ```_ @ 44100```), so for example a signal with 44100 samples of delay is written like: ```process = _ @ 44100;```
