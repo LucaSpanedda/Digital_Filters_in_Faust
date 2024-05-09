@@ -14,7 +14,7 @@ Delay lines in Faust are divided into the following categories:
 - ```@``` - indicates a number of variable delay samples.
 (ex. ```_ @ 44100```), so for example a signal with 44100 samples of delay is written like: ```process = _ @ 44100;```
 
-- in a ```function(x) = x;``` a definition like: ```function(x) = x - x';``` indicates any input and: ```'``` a sample of delay, ```''``` as two samples, etc.
+- ```'``` - in a ```function(x) = x;``` a definition like: ```function(x) = x - x';``` indicates any input and: ```'``` a sample of delay, ```''``` as two samples, etc.
 So ```x - x'``` is the first derivate of the signal.
 
 Through delay lines, 
