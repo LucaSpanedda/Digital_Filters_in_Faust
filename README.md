@@ -12,16 +12,24 @@ A function with one input that goes directly to the output is written as follows
  process = _;
 ```
 where
-```process``` is the **main** function in Faust (the compiler's output function)
+```process``` is the ***main*** function in Faust (the compiler's output function).
 
 Faust provides us with three different syntaxes to express a delay line:
+
+- ```'``` - is used to express a one sample delay. Time expressions can be chained, so the output signal of this program
+```
+ // import Standard Faust library 
+ // https://github.com/grame-cncm/faustlibraries/ 
+ import("stdfaust.lib");
+ process = _''';
+```
+will produce a delayed signal of three samples.
 
 - ```mem``` - indicates a single sample delay.
 
 - ```@``` - indicates a number of variable delay samples.
 (ex. ```_ @ 44100```), so for example a signal with 44100 samples of delay is written like: ```process = _ @ 44100;```
 
-- ```'``` - in a ```function(x) = x;``` a definition like: ```function(x) = x - x';``` indicates any input and: ```'``` a sample of delay, ```''``` as two samples, etc.
 So ```x - x'``` is the first derivate of the signal.
 
 Through delay lines, 
