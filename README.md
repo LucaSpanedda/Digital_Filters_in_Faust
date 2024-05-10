@@ -183,6 +183,14 @@ This brief preamble will be explained further in the chapter on the bilinear tra
 Function for Conversion from Milliseconds to Samples:
 we input the time in milliseconds,
 and the function gives us the value in samples.
+```
+// import Standard Faust library 
+// https://github.com/grame-cncm/faustlibraries/ 
+import("stdfaust.lib");
+milliseconds = 100;
+msec2samps(msec) = msec*ma.SR/1000;
+process = msec2samps(milliseconds);
+```
 
 For example, if we have a sampling frequency 
 of 48,000 samples per second, 
