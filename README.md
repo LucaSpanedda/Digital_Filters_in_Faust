@@ -174,7 +174,8 @@ Now we will illustrate three main methods for Implementing Recursive Circuits in
 Concluding this chapter on filter syntax in FAUST, we need to introduce a fundamental concept that will help us gain a more comprehensive understanding of digital filters: the relationship between time and sampling frequency. In particular, we need to focus on the relationship between milliseconds and samples.
 
 ## Conversion of Milliseconds to Samples and Vice Versa
-
+Digital filters differ from analog filters for one particular reason: the Analog-to-Digital (AD) conversion system involves discretizing a continuous physical phenomenon into a sampled numerical one.
+Understanding the relationship between time and frequency helps us in reasoning and practical applications of digital filters. These filters indeed entail spectral changes (when observed in the frequency domain) and involve temporal integration changes (when observed in the time domain).
 ### Conversion from Milliseconds to Samples
 
 Function for Conversion from Milliseconds to Samples:
