@@ -34,15 +34,21 @@ will produce a delayed signal of three samples.
  // import Standard Faust library 
  // https://github.com/grame-cncm/faustlibraries/ 
  import("stdfaust.lib");
-
  process = _ : mem : mem : _;
 ```
 will produce a delayed signal of two samples.
 
 ---
 
-- ```@``` - indicates a number of variable delay samples.
-(ex. ```_ @ 44100```), so for example a signal with 44100 samples of delay is written like: ```process = _ @ 44100;```
+- ```@``` - indicates a number of variable delay samples, so for example a signal with 192000 samples of delay is written like:
+```
+ // import Standard Faust library 
+ // https://github.com/grame-cncm/faustlibraries/ 
+ import("stdfaust.lib");
+ process = _ @ 192000;
+```
+
+---
 
 So ```x - x'``` is the first derivate of the signal.
 
