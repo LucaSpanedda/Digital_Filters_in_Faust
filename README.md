@@ -50,11 +50,8 @@ will produce a delayed signal of two samples.
 
 ---
 
-So ```x - x'``` is the first derivate of the signal.
-
-Through delay lines, 
-we can create a Dirac impulse, which represents 
-our minimum DSP unit, namely the single sample
+Now, another element that we can introduce through the filter syntax is the Dirac impulse, 
+which represents our minimum DSP unit, namely the single sample
 by putting a number 1 and subtracting the same value from it
 but doing it at a delayed sample.
 
@@ -66,9 +63,9 @@ Example:
   
  // Dirac Impulse with delay lines - Impulse at Compile Time 
  dirac = 1 - 1'; 
- process = dirac, dirac; 
+ process = dirac; 
 ```
-or something like:
+or something like that using functional syntax:
 ```
  // import Standard Faust library 
  // https://github.com/grame-cncm/faustlibraries/ 
