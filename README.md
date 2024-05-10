@@ -246,89 +246,73 @@ and thus a greater definition.
 
 ## Phase Alignment of Feedback
 
-In the digital domain, the feedback of a 
-delay line, when applied, costs by default one sample delay.
-Feedback = 1 Sample
+We need to spend a few words about the implementation of a delay line in feedback in the digital world.
 
-At the moment I decide therefore to put
-inside the feedback a number
-of delay samples,
-we can take for example 10 samples
-in our delay line, it means that,
-The direct signal will come out for delay samples at:
-
-input in the delay signal --> output from the delay 10samp
-
-1st Feedback:
-output from the delay at 10samp + 1 feedback = 
-input in the delay 11samp --> output from the delay 21samp
-
-2nd Feedback:
-output from the delay at 21samp + 1 feedback = 
-input in the delay 22samp --> output from the delay 32samp
-
-3rd Feedback:
-output from the delay at 32samp + 1 feedback = 
-input in the delay 33samp --> output from the delay 43samp
-
-and so on...
-
-we can therefore notice immediately that we will not have
-the correct delay value required inside the same,
-because of the sample delay that occurs at the moment
-when I decide to create a feedback circuit.
-if we use the method of subtracting one sample from the delay line,
-we will have this result:
-
-input in the delay signal --> -1, output from the delay 9samp
-
-1st Feedback:
-output from the delay at 9samp + 1 feedback = 
-input in the delay 10samp --> -1, output from the delay 19samp
-
-2nd Feedback:
-output from the delay at 19samp + 1 feedback = 
-input in the delay 20samp --> -1, output from the delay 29samp
-
-3rd Feedback:
-output from the delay at 29samp + 1 feedback = 
-input in the delay 30samp --> -1, output from the delay 39samp
-
-and so on...
-
-we can therefore notice that with this method,
-compared to the previous one we will have as input to the delay line
-always the number of delay samples required.
-But we notice that from the first output of the delayed signal
-subtracting -1 we have one sample delay
-less than we would like.
-To realign everything, we just need to add one sample delay
-to the overall output of the circuit, thus having from the first output:
-
-input in the delay signal --> -1, output from the delay 9samp +1 = 10out
-
-1st Feedback:
-output from the delay at 9samp + 1 feedback = 
-input in the delay 10samp --> -1, output from the delay 19samp +1 = 20out
-
-and so on...
-
-Let's proceed with an implementation:
+In the following program, we have a Dirac impulse that is summed by itselfs delayed by 2 samples.
 ```
-// import Standard Faust library  
-// https://github.com/grame-cncm/faustlibraries/  
-import("stdfaust.lib"); 
-  
-sampdel = ma.SR;  
-// sample rate - ma.SR 
-  
-process =   _ :  
-            // input signal goes in 
-            +~ @(sampdel -1) *(0.8)  
-            // delay line with feedback: +~ 
-            : mem 
-            // output goes to a single sample delay 
-            <: si.bus(2); 
+ /// import Standard Faust library 
+ // https://github.com/grame-cncm/faustlibraries/ 
+ import("stdfaust.lib");
+ dirac = 1-1';
+ process = (_ + dirac) ~ _ @2;
+```
+
+We expect these values to appear in the first 10 samples:
+
+| nth sample |   value 	 |
+|------------|-----------|
+|      0     |	   1	 |	
+|      1     |	   0	 |
+|      2     |	   1	 |
+|      3     |	   0	 |
+|      4     |	   1	 |
+|      5     |	   0	 |
+|      6     |	   1	 |
+|      7     |	   0	 |
+|      8     |	   1	 |
+|      9     |	   0	 |
+
+However, the results of the data plot are as follows:
+
+| nth sample |   value 	 |
+|------------|-----------|
+|      0     |	   1	 |	
+|      1     |	   0	 |
+|      2     |	   0	 |
+|      3     |	   1	 |
+|      4     |	   0	 |
+|      5     |	   0	 |
+|      6     |	   1	 |
+|      7     |	   0	 |
+|      8     |	   0	 |
+|      9     |	   1	 |
+
+There's something wrong. With each feedback cycle, it's being delayed by one extra sample!
+That's because in the digital domain, the feedback of a 
+delay line, when applied, costs by default one sample delay.
+
+*Feedback = 1 Sample*
+
+So one must consider that the number of delay samples equals the number of samples minus 1:
+```
+ /// import Standard Faust library 
+ // https://github.com/grame-cncm/faustlibraries/ 
+ import("stdfaust.lib");
+ dirac = 1-1';
+ delSamps = 2;
+ process = (_ + dirac) ~ _@(delSamps-1);
+```
+
+In some application scenarios later on, we'll need a one-sample delay even at the input signal. 
+In this case, simply concatenating a delay line in series will suffice.
+
+```
+ /// import Standard Faust library 
+ // https://github.com/grame-cncm/faustlibraries/ 
+ import("stdfaust.lib");
+ dirac = 1-1';
+ delSamps = 2;
+ process = (_ + dirac) ~ _@(delSamps-1) : mem;
 ```
 
 
