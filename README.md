@@ -1,25 +1,63 @@
 # Digital Filters in Faust
 
-## Delay Lines
+## Preludes to Filter Syntax in Faust
 
-in FAUST the ```_``` represent a signal input.
-A function with one input that goes directly to the output is written as follows: ```process = _;```.
+### Constructing a delay line
+In FAUST the ```_``` represent a signal input.
+A function with one input that goes directly to the output is written as follows: 
+```
+ // import Standard Faust library 
+ // https://github.com/grame-cncm/faustlibraries/ 
+ import("stdfaust.lib");
 
-```process = _;``` is the main function in Faust (the compiler's output function)
+ process = _;
+```
+where
+```process``` is the ***main*** function in Faust (the compiler's output function).
 
-Delay lines in Faust are divided into the following categories:
+---
 
-```mem``` - indicates a single sample delay.
+Faust provides us with three different syntaxes to express a delay line:
 
-```@``` - indicates a number of variable delay samples.
-(ex. ```_ @ 44100```), so for example a signal with 44100 samples of delay is written like: ```process = _ @ 44100;```
+- ```'``` - is used to express a one sample delay. Time expressions can be chained, so the output 
+  signal of this program
+  ```
+   // import Standard Faust library 
+   // https://github.com/grame-cncm/faustlibraries/ 
+   import("stdfaust.lib");
 
-in a ```function(x) = x;``` a definition like: ```function(x) = x - x';``` indicates any input and: ```'``` a sample of delay, ```''``` as two samples, etc.
-So ```x - x'``` is the first derivate of the signal.
+   process = _''';
+  ```
+  will produce a delayed signal of three samples.
 
-Through delay lines, 
-we can create a Dirac impulse, which represents 
-our minimum DSP unit, namely the single sample
+  ---
+
+- ```mem``` - indicates a 1 sample delay. You can use the "mem" successively add delay samples, so 
+  the output signal of this program
+  ```
+   // import Standard Faust library 
+   // https://github.com/grame-cncm/faustlibraries/ 
+   import("stdfaust.lib");
+
+   process = _ : mem : mem : _;
+  ```
+  will produce a delayed signal of two samples.
+
+  ---
+
+- ```@``` - indicates a number of variable delay samples, so for example a signal with 192000 
+  samples of delay is written like:
+  ```
+   // import Standard Faust library 
+   // https://github.com/grame-cncm/faustlibraries/ 
+   import("stdfaust.lib");
+
+   process = _ @ 192000;
+  ```
+
+### Dirac impulse
+Now, another element that we can introduce through the filter syntax is the Dirac impulse, 
+which represents our minimum DSP unit, namely the single sample
 by putting a number 1 and subtracting the same value from it
 but doing it at a delayed sample.
 
@@ -31,9 +69,9 @@ Example:
   
  // Dirac Impulse with delay lines - Impulse at Compile Time 
  dirac = 1 - 1'; 
- process = dirac, dirac; 
+ process = dirac; 
 ```
-or something like:
+or something like that using functional syntax:
 ```
  // import Standard Faust library 
  // https://github.com/grame-cncm/faustlibraries/ 
@@ -41,51 +79,68 @@ or something like:
   
  // Dirac Impulse with delay lines - Impulse at Compile Time 
  dirac(x) = x - x'; 
- process = dirac(1) <: _, _; 
+ process = dirac(1); 
 ```
-These two are the same thing.
+These last two programs produce the same result.
 
-## Some Methods for Implementing Recursive Circuits in the Faust Language
+### Methods for Implementing Recursive Circuits in the Faust Language
 
-Now we will illustrate 3 main methods for Implementing Recursive Circuits in the Faust Language:
+Now we will illustrate three main methods for Implementing Recursive Circuits in FAUST Language:
 
 - Writing the code line with internal recursion:
   
-  in this way the tilde ```~``` operator sends the signal
+  in this way *tilde* ```~``` operator sends the signal
   output to itself, to the first available input
   creating a feedback circuit.
+  
   One way to force the operator to point to a certain point
   in the code, is to put parentheses ```()```, in this way ```~```
-  will point to the input before the parenthesis. An example with an operator ```%``` in the feedback: ```process = 0.001 : (_ + _) ~ _ % 1;```
-- A second method consists of using with{} .
+  will point to the input before the parenthesis.
+
+  In this program, the input is summed with itself delayed by one sample and multiplied by 0.5:
+  ```
+  // import Standard Faust library 
+  // https://github.com/grame-cncm/faustlibraries/ 
+  import("stdfaust.lib"); 
+
+  process = 0.001 : (_ + _) ~ _ * (0.5);
+  ```
+
+  ---
   
+- Using the with construction ```with{};```:
+
+  It can be used to create a local enviroment.
   You can define a function in which are passed
   the various arguments of the function that control
   the parameters of the code,
   and say that that function is equal to
-  exit from the with, with ```~ _```
+  exit from the with, with ```~ _```.
+  You can find an exhaustive explanation of [with construction here](https://faustdoc.grame.fr/manual/syntax/index.html#with-expression)
   
   Example:
-```
- // import Standard Faust library 
- // https://github.com/grame-cncm/faustlibraries/ 
- import("stdfaust.lib"); 
+  ```
+   // import Standard Faust library 
+   // https://github.com/grame-cncm/faustlibraries/ 
+   import("stdfaust.lib"); 
 
-//where out ~ _ returns to itself.
-function_with(input1, input2) = out ~ _
+   //where out ~ _ returns to itself.
+   function_with(input1, input2) = out ~ _
        	with{  
         		section1 = 2 * input1;
         		section2(argument1) = argument1 * section1 + input2;
         		out = section2;
         	};
         	
-process = function_with(0.40, 2);
-```
+   process = function_with(0.40, 2);
+  ```
 
-Moreover, with in Faust allows declaring variables
-that are not pointed to from outside the code but only
-from the belonging function; in this case
-the function to which with belongs is "function_with".
+  Moreover, with in Faust allows declaring variables
+  that are not pointed to from outside the code but only
+  from the belonging function; in this case
+  the function to which with belongs is "function_with".
+
+  ---
 
 - A third method is to use the letrec environment.
   
@@ -113,33 +168,49 @@ the function to which with belongs is "function_with".
     // Output of the letrec function 
     process = lowpass(100, no.noise) <: si.bus(2); 
     ```
-    
 
-## Conversion of Milliseconds to Samples and Vice Versa
+---
+
+Concluding this chapter on filter syntax in FAUST, we need to introduce a fundamental concept that will help us gain a more comprehensive understanding of digital filters: the relationship between milliseconds and samples -> sampling frequency.
+
+## Milliseconds - Samples and the importance of the sampling frequency
+Digital filters differ from analog filters for one particular reason: the Analog-to-Digital (AD) conversion system involves discretizing a continuous physical phenomenon into a sampled numerical one.
+Understanding the relationship between time and samples helps us in reasoning and practical applications of digital filters. These filters indeed entail spectral changes (when observed in the frequency domain) and involve temporal integration changes (when observed in the time domain).
+This brief preamble will be explained further in the chapter on the bilinear transform. For now, let's focus on small examples of converting between milliseconds and samples.
 
 ### Conversion from Milliseconds to Samples
 
-Function for Conversion from Milliseconds to Samples:
-we input the time in milliseconds,
-and the function gives us the value in samples.
+This program takes input time expressed in milliseconds 
+and returns the value in samples.
+```
+ // import Standard Faust library 
+ // https://github.com/grame-cncm/faustlibraries/ 
+ import("stdfaust.lib");
+
+ milliseconds = 10;
+ msec2samps(msec) = msec * (ma.SR/1000);
+ process = msec2samps(milliseconds);
+```
+Through ```ma.SR```, we use the current sampling frequency of 
+the machine we are using.
 
 For example, if we have a sampling frequency 
-of 48,000 samples per second, 
+of **96000** samples per second, 
 it means that 1000ms (1 second) is represented
-by 48,000 parts, and therefore a single unit
-of time like 1 ms. Corresponds digitally to 48 samples.
+by **96000 parts**, and therefore **a single unit
+of time** like 1ms **corresponds** digitally to **96 samples**.
 
 For this reason, we divide the sampling frequency
 by 1000ms, resulting in a total number of samples
-that corresponds to 1 ms. in the digital world at 
+that corresponds to 1ms in the digital world at 
 a certain sampling frequency.
 
 And then we multiply the result of this operation
 by the total number of milliseconds we want to obtain as 
 a representation in samples.
-If we multiply *10. For example, we will get
-480 samples at a sampling frequency 
-of 48,000 samples per second.
+If we multiply by 100 we will have
+**9600 samples every 100ms** at a sampling frequency 
+of 96000 samples per second.
 
 ### Conversion from Samples to Milliseconds
 
