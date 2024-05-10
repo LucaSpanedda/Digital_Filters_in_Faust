@@ -250,6 +250,30 @@ In the digital domain, the feedback of a
 delay line, when applied, costs by default one sample delay.
 Feedback = 1 Sample
 
+In the following program, I construct a feedback that delays me by 2 samples.
+```
+ /// import Standard Faust library 
+ // https://github.com/grame-cncm/faustlibraries/ 
+ import("stdfaust.lib");
+ dirac = 1-1';
+ process = (_ + dirac) ~ _ @2;
+```
+As can be observed from the data plot
+
+| nth sample |   value 	 |
+|------------|-----------|
+|      1     |	   1	 |	
+|      2     |	   0	 |
+|      3     |	   0	 |
+|      4     |	   1	 |
+|      5     |	   0	 |
+|      6     |	   0	 |
+|      7     |	   1	 |
+|      8     |	   0	 |
+|      9     |	   0	 |
+|      10    |	   1	 |
+
+
 At the moment I decide therefore to put
 inside the feedback a number
 of delay samples,
