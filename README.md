@@ -81,7 +81,7 @@ or something like that using functional syntax:
 ```
 These last two programs produce the same result.
 
-## Some Methods for Implementing Recursive Circuits in the Faust Language
+### Some Methods for Implementing Recursive Circuits in the Faust Language
 
 Now we will illustrate 3 main methods for Implementing Recursive Circuits in the Faust Language:
 
