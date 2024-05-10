@@ -293,11 +293,15 @@ delay line, when applied, costs by default one sample delay.
 
 *Feedback = 1 Sample*
 
-Performing feedback inherently costs one sample as computational overhead,
-so one must consider that the number of delay samples equals the number of samples minus 1.
-
-
-
+So one must consider that the number of delay samples equals the number of samples minus 1:
+```
+/// import Standard Faust library 
+// https://github.com/grame-cncm/faustlibraries/ 
+import("stdfaust.lib");
+dirac = 1-1';
+delSamps = 2;
+process = (_ + dirac) ~ _@(delSamps-1);
+```
 
 we can therefore notice immediately that we will not have
 the correct delay value required inside the same,
