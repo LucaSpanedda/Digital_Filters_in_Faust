@@ -19,17 +19,18 @@ where
 
 Faust provides us with three different syntaxes to express a delay line:
 
-- ```'``` - is used to express a one sample delay. Time expressions can be chained, so the output signal of this program
-```
- // import Standard Faust library 
- // https://github.com/grame-cncm/faustlibraries/ 
- import("stdfaust.lib");
+- ```'``` - is used to express a one sample delay. Time expressions can be chained, so the output 
+  signal of this program
+  ```
+   // import Standard Faust library 
+   // https://github.com/grame-cncm/faustlibraries/ 
+   import("stdfaust.lib");
 
- process = _''';
-```
-will produce a delayed signal of three samples.
+   process = _''';
+  ```
+  will produce a delayed signal of three samples.
 
----
+  ---
 
 - ```mem``` - indicates a 1 sample delay. You can use the "mem" successively add delay samples, so the output signal of this program
 ```
