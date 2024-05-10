@@ -101,6 +101,9 @@ Now we will illustrate three main methods for Implementing Recursive Circuits in
 
   process = 0.001 : (_ + _) ~ _ * (0.5);
   ```
+
+  ---
+  
 - A second method consists of using with{} .
   
   You can define a function in which are passed
@@ -130,6 +133,8 @@ Moreover, with in Faust allows declaring variables
 that are not pointed to from outside the code but only
 from the belonging function; in this case
 the function to which with belongs is "function_with".
+
+---
 
 - A third method is to use the letrec environment.
   
