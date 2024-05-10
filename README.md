@@ -99,11 +99,11 @@ Now we will illustrate three main methods for Implementing Recursive Circuits in
 
   In this program, the input is summed with itself delayed by one sample and multiplied by 0.5:
   ```
-  // import Standard Faust library 
+  /// import Standard Faust library 
   // https://github.com/grame-cncm/faustlibraries/ 
   import("stdfaust.lib"); 
 
-  process = 0.001 : (_ + _) ~ _ * (0.5);
+  process = 1000-1000' : (_ + _) ~ _ * (0.9999) : sin;
   ```
 
   ---
