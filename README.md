@@ -108,7 +108,7 @@ Now we will illustrate three main methods for Implementing Recursive Circuits in
 
   ---
   
-- A second method consists of using with{} .
+- A second method consists of using the with construction ```with{};``` to create a local enviroment.
   
   You can define a function in which are passed
   the various arguments of the function that control
