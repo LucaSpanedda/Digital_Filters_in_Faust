@@ -1,8 +1,8 @@
 # Digital Filters in Faust
 
-## Delay Lines
+## Preludes to Filter Syntax in Faust
 
-### Preludes to Filter Syntax in Faust
+### Constructing a delay line
 In FAUST the ```_``` represent a signal input.
 A function with one input that goes directly to the output is written as follows: 
 ```
@@ -52,8 +52,7 @@ will produce a delayed signal of two samples.
  process = _ @ 192000;
 ```
 
----
-
+### Dirac impulse
 Now, another element that we can introduce through the filter syntax is the Dirac impulse, 
 which represents our minimum DSP unit, namely the single sample
 by putting a number 1 and subtracting the same value from it
@@ -81,9 +80,9 @@ or something like that using functional syntax:
 ```
 These last two programs produce the same result.
 
-### Some Methods for Implementing Recursive Circuits in the Faust Language
+### Methods for Implementing Recursive Circuits in the Faust Language
 
-Now we will illustrate 3 main methods for Implementing Recursive Circuits in the Faust Language:
+Now we will illustrate three main methods for Implementing Recursive Circuits in FAUST Language:
 
 - Writing the code line with internal recursion:
   
@@ -92,7 +91,14 @@ Now we will illustrate 3 main methods for Implementing Recursive Circuits in the
   creating a feedback circuit.
   One way to force the operator to point to a certain point
   in the code, is to put parentheses ```()```, in this way ```~```
-  will point to the input before the parenthesis. An example with an operator ```%``` in the feedback: ```process = 0.001 : (_ + _) ~ _ % 1;```
+  will point to the input before the parenthesis. An example with an operator ```%``` in the feedback:
+  ```
+  // import Standard Faust library 
+  // https://github.com/grame-cncm/faustlibraries/ 
+  import("stdfaust.lib"); 
+
+  process = 0.001 : (_ + _) ~ _ % 1;
+  ```
 - A second method consists of using with{} .
   
   You can define a function in which are passed
