@@ -9,6 +9,7 @@ A function with one input that goes directly to the output is written as follows
  // import Standard Faust library 
  // https://github.com/grame-cncm/faustlibraries/ 
  import("stdfaust.lib");
+
  process = _;
 ```
 where
@@ -23,6 +24,7 @@ Faust provides us with three different syntaxes to express a delay line:
  // import Standard Faust library 
  // https://github.com/grame-cncm/faustlibraries/ 
  import("stdfaust.lib");
+
  process = _''';
 ```
 will produce a delayed signal of three samples.
@@ -34,6 +36,7 @@ will produce a delayed signal of three samples.
  // import Standard Faust library 
  // https://github.com/grame-cncm/faustlibraries/ 
  import("stdfaust.lib");
+
  process = _ : mem : mem : _;
 ```
 will produce a delayed signal of two samples.
@@ -45,6 +48,7 @@ will produce a delayed signal of two samples.
  // import Standard Faust library 
  // https://github.com/grame-cncm/faustlibraries/ 
  import("stdfaust.lib");
+
  process = _ @ 192000;
 ```
 
@@ -73,9 +77,9 @@ or something like that using functional syntax:
   
  // Dirac Impulse with delay lines - Impulse at Compile Time 
  dirac(x) = x - x'; 
- process = dirac(1) <: _, _; 
+ process = dirac(1); 
 ```
-These two are the same thing.
+These last two programs produce the same result.
 
 ## Some Methods for Implementing Recursive Circuits in the Faust Language
 
