@@ -303,6 +303,8 @@ So one must consider that the number of delay samples equals the number of sampl
  process = (_ + dirac) ~ _@(delSamps-1);
 ```
 
+---
+
 In some application scenarios later on, we'll need a one-sample delay even at the input signal. 
 In this case, simply concatenating a delay line in series will suffice.
 
