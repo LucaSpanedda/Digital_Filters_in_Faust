@@ -246,11 +246,9 @@ and thus a greater definition.
 
 ## Phase Alignment of Feedback
 
-In the digital domain, the feedback of a 
-delay line, when applied, costs by default one sample delay.
-Feedback = 1 Sample
+We need to spend a few words about the implementation of a delay line in feedback in the digital world.
 
-In the following program, I construct a feedback that delays me by 2 samples.
+In the following program, we have a Dirac impulse that is summed by itselfs delayed by 2 samples.
 ```
  /// import Standard Faust library 
  // https://github.com/grame-cncm/faustlibraries/ 
@@ -258,44 +256,48 @@ In the following program, I construct a feedback that delays me by 2 samples.
  dirac = 1-1';
  process = (_ + dirac) ~ _ @2;
 ```
-As can be observed from the data plot
+
+We expect these values to appear in the first 10 samples:
 
 | nth sample |   value 	 |
 |------------|-----------|
-|      1     |	   1	 |	
-|      2     |	   0	 |
+|      0     |	   1	 |	
+|      1     |	   0	 |
+|      2     |	   1	 |
 |      3     |	   0	 |
 |      4     |	   1	 |
 |      5     |	   0	 |
-|      6     |	   0	 |
-|      7     |	   1	 |
-|      8     |	   0	 |
+|      6     |	   1	 |
+|      7     |	   0	 |
+|      8     |	   1	 |
 |      9     |	   0	 |
-|      10    |	   1	 |
+
+However, the results of the data plot are as follows:
+
+| nth sample |   value 	 |
+|------------|-----------|
+|      0     |	   1	 |	
+|      1     |	   0	 |
+|      2     |	   0	 |
+|      3     |	   1	 |
+|      4     |	   0	 |
+|      5     |	   0	 |
+|      6     |	   1	 |
+|      7     |	   0	 |
+|      8     |	   0	 |
+|      9     |	   1	 |
+
+There's something wrong. With each feedback cycle, it's being delayed by one extra sample!
+That's because in the digital domain, the feedback of a 
+delay line, when applied, costs by default one sample delay.
+
+*Feedback = 1 Sample*
+
+Performing feedback inherently costs one sample as computational overhead,
+so one must consider that the number of delay samples equals the number of samples minus 1.
 
 
-At the moment I decide therefore to put
-inside the feedback a number
-of delay samples,
-we can take for example 10 samples
-in our delay line, it means that,
-The direct signal will come out for delay samples at:
 
-input in the delay signal --> output from the delay 10samp
-
-1st Feedback:
-output from the delay at 10samp + 1 feedback = 
-input in the delay 11samp --> output from the delay 21samp
-
-2nd Feedback:
-output from the delay at 21samp + 1 feedback = 
-input in the delay 22samp --> output from the delay 32samp
-
-3rd Feedback:
-output from the delay at 32samp + 1 feedback = 
-input in the delay 33samp --> output from the delay 43samp
-
-and so on...
 
 we can therefore notice immediately that we will not have
 the correct delay value required inside the same,
