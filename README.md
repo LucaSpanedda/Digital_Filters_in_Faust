@@ -89,9 +89,10 @@ Now we will illustrate three main methods for Implementing Recursive Circuits in
 
 - Writing the code line with internal recursion:
   
-  in this way the *tilde* ```~``` operator sends the signal
+  in this way *tilde* ```~``` operator sends the signal
   output to itself, to the first available input
   creating a feedback circuit.
+  
   One way to force the operator to point to a certain point
   in the code, is to put parentheses ```()```, in this way ```~```
   will point to the input before the parenthesis.
