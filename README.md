@@ -32,26 +32,28 @@ Faust provides us with three different syntaxes to express a delay line:
 
   ---
 
-- ```mem``` - indicates a 1 sample delay. You can use the "mem" successively add delay samples, so the output signal of this program
-```
- // import Standard Faust library 
- // https://github.com/grame-cncm/faustlibraries/ 
- import("stdfaust.lib");
+- ```mem``` - indicates a 1 sample delay. You can use the "mem" successively add delay samples, so 
+  the output signal of this program
+  ```
+   // import Standard Faust library 
+   // https://github.com/grame-cncm/faustlibraries/ 
+   import("stdfaust.lib");
 
- process = _ : mem : mem : _;
-```
-will produce a delayed signal of two samples.
+   process = _ : mem : mem : _;
+  ```
+  will produce a delayed signal of two samples.
 
----
+  ---
 
-- ```@``` - indicates a number of variable delay samples, so for example a signal with 192000 samples of delay is written like:
-```
- // import Standard Faust library 
- // https://github.com/grame-cncm/faustlibraries/ 
- import("stdfaust.lib");
+- ```@``` - indicates a number of variable delay samples, so for example a signal with 192000 
+  samples of delay is written like:
+  ```
+   // import Standard Faust library 
+   // https://github.com/grame-cncm/faustlibraries/ 
+   import("stdfaust.lib");
 
- process = _ @ 192000;
-```
+   process = _ @ 192000;
+  ```
 
 ### Dirac impulse
 Now, another element that we can introduce through the filter syntax is the Dirac impulse, 
