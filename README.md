@@ -295,70 +295,24 @@ delay line, when applied, costs by default one sample delay.
 
 So one must consider that the number of delay samples equals the number of samples minus 1:
 ```
-/// import Standard Faust library 
-// https://github.com/grame-cncm/faustlibraries/ 
-import("stdfaust.lib");
-dirac = 1-1';
-delSamps = 2;
-process = (_ + dirac) ~ _@(delSamps-1);
+ /// import Standard Faust library 
+ // https://github.com/grame-cncm/faustlibraries/ 
+ import("stdfaust.lib");
+ dirac = 1-1';
+ delSamps = 2;
+ process = (_ + dirac) ~ _@(delSamps-1);
 ```
 
-we can therefore notice immediately that we will not have
-the correct delay value required inside the same,
-because of the sample delay that occurs at the moment
-when I decide to create a feedback circuit.
-if we use the method of subtracting one sample from the delay line,
-we will have this result:
+In some application scenarios later on, we'll need a one-sample delay even at the input signal. 
+In this case, simply concatenating a delay line in series will suffice.
 
-input in the delay signal --> -1, output from the delay 9samp
-
-1st Feedback:
-output from the delay at 9samp + 1 feedback = 
-input in the delay 10samp --> -1, output from the delay 19samp
-
-2nd Feedback:
-output from the delay at 19samp + 1 feedback = 
-input in the delay 20samp --> -1, output from the delay 29samp
-
-3rd Feedback:
-output from the delay at 29samp + 1 feedback = 
-input in the delay 30samp --> -1, output from the delay 39samp
-
-and so on...
-
-we can therefore notice that with this method,
-compared to the previous one we will have as input to the delay line
-always the number of delay samples required.
-But we notice that from the first output of the delayed signal
-subtracting -1 we have one sample delay
-less than we would like.
-To realign everything, we just need to add one sample delay
-to the overall output of the circuit, thus having from the first output:
-
-input in the delay signal --> -1, output from the delay 9samp +1 = 10out
-
-1st Feedback:
-output from the delay at 9samp + 1 feedback = 
-input in the delay 10samp --> -1, output from the delay 19samp +1 = 20out
-
-and so on...
-
-Let's proceed with an implementation:
 ```
-// import Standard Faust library  
-// https://github.com/grame-cncm/faustlibraries/  
-import("stdfaust.lib"); 
-  
-sampdel = ma.SR;  
-// sample rate - ma.SR 
-  
-process =   _ :  
-            // input signal goes in 
-            +~ @(sampdel -1) *(0.8)  
-            // delay line with feedback: +~ 
-            : mem 
-            // output goes to a single sample delay 
-            <: si.bus(2); 
+ /// import Standard Faust library 
+ // https://github.com/grame-cncm/faustlibraries/ 
+ import("stdfaust.lib");
+ dirac = 1-1';
+ delSamps = 2;
+ process = (_ + dirac) ~ _@(delSamps-1) : mem;
 ```
 
 
