@@ -180,9 +180,8 @@ This brief preamble will be explained further in the chapter on the bilinear tra
 
 ### Conversion from Milliseconds to Samples
 
-Function for Conversion from Milliseconds to Samples:
-we input the time in milliseconds,
-and the function gives us the value in samples.
+This program takes input time expressed in milliseconds 
+and returns the value in samples.
 ```
 // import Standard Faust library 
 // https://github.com/grame-cncm/faustlibraries/ 
@@ -191,24 +190,26 @@ milliseconds = 100;
 msec2samps(msec) = msec*ma.SR/1000;
 process = msec2samps(milliseconds);
 ```
+Through ```ma.SR```, we use the current sampling frequency of 
+the machine we are using.
 
 For example, if we have a sampling frequency 
-of 48,000 samples per second, 
+of **96000** samples per second, 
 it means that 1000ms (1 second) is represented
-by 48,000 parts, and therefore a single unit
-of time like 1 ms. Corresponds digitally to 48 samples.
+by **96000 parts**, and therefore **a single unit
+of time** like 1ms **corresponds** digitally to **96 samples**.
 
 For this reason, we divide the sampling frequency
 by 1000ms, resulting in a total number of samples
-that corresponds to 1 ms. in the digital world at 
+that corresponds to 1ms in the digital world at 
 a certain sampling frequency.
 
 And then we multiply the result of this operation
 by the total number of milliseconds we want to obtain as 
 a representation in samples.
-If we multiply *10. For example, we will get
-480 samples at a sampling frequency 
-of 48,000 samples per second.
+If we multiply by 10 we will get
+**960 samples per 10ms** at a sampling frequency 
+of 96000 samples per second.
 
 ### Conversion from Samples to Milliseconds
 
