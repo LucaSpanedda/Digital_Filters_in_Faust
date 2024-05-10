@@ -115,7 +115,8 @@ Now we will illustrate three main methods for Implementing Recursive Circuits in
   the various arguments of the function that control
   the parameters of the code,
   and say that that function is equal to
-  exit from the with, with ```~ _```
+  exit from the with, with ```~ _```.
+  You can find a better explanation (here)[https://faustdoc.grame.fr/manual/syntax/index.html#with-expression]
   
   Example:
   ```
