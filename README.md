@@ -168,7 +168,10 @@ Now we will illustrate three main methods for Implementing Recursive Circuits in
     // Output of the letrec function 
     process = lowpass(100, no.noise) <: si.bus(2); 
     ```
-    
+
+---
+
+Concluding this chapter on filter syntax in FAUST, we need to introduce a fundamental concept that will help us gain a more comprehensive understanding of digital filters: the relationship between time and sampling frequency. In particular, we need to focus on the relationship between milliseconds and samples.
 
 ## Conversion of Milliseconds to Samples and Vice Versa
 
