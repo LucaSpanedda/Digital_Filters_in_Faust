@@ -291,7 +291,7 @@ There's something wrong. With each feedback cycle, it's being delayed by one ext
 That's because in the digital domain, the feedback of a 
 delay line, when applied, costs by default one sample delay.
 
-*Feedback = 1 Sample*
+'*Feedback = 1 Sample*'
 
 So one must consider that the number of delay samples equals the number of samples minus 1:
 ```
