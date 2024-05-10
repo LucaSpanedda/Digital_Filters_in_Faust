@@ -183,12 +183,13 @@ This brief preamble will be explained further in the chapter on the bilinear tra
 This program takes input time expressed in milliseconds 
 and returns the value in samples.
 ```
-// import Standard Faust library 
-// https://github.com/grame-cncm/faustlibraries/ 
-import("stdfaust.lib");
-milliseconds = 100;
-msec2samps(msec) = msec*ma.SR/1000;
-process = msec2samps(milliseconds);
+ // import Standard Faust library 
+ // https://github.com/grame-cncm/faustlibraries/ 
+ import("stdfaust.lib");
+
+ milliseconds = 10;
+ msec2samps(msec) = msec * (ma.SR/1000);
+ process = msec2samps(milliseconds);
 ```
 Through ```ma.SR```, we use the current sampling frequency of 
 the machine we are using.
@@ -207,8 +208,8 @@ a certain sampling frequency.
 And then we multiply the result of this operation
 by the total number of milliseconds we want to obtain as 
 a representation in samples.
-If we multiply by 10 we will get
-**960 samples per 10ms** at a sampling frequency 
+If we multiply by 100 we will have
+**9600 samples every 100ms** at a sampling frequency 
 of 96000 samples per second.
 
 ### Conversion from Samples to Milliseconds
