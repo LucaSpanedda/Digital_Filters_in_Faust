@@ -1,0 +1,68 @@
+/*******************************************************************************
+* CODE EXAMPLES (Digital_Filters_in_Faust)
+*******************************************************************************/
+import("stdfaust.lib");
+
+
+// signal input - output
+//process = _;
+
+// signal in delay (' = mem), (mem = Z^(-1))
+//process = _'';
+
+// signal in delay (' = mem), (mem = Z^(-1))
+//process = _ : mem : mem : _;
+
+// signal in delay (@192000 = 192000 samples of delay)
+//process = _ @ 192000;
+
+// Dirac Impulse with delay lines - Impulse at Compile Time 
+dirac0 = 1 - 1'; 
+//process = dirac0; 
+
+// Dirac Impulse with delay lines - Impulse at Compile Time 
+dirac1(x) = x - x'; 
+//process = dirac1(1); 
+
+// dirac in feedback in sin
+//process = (1 - 1') * 1000 : (_ + _) ~ _ * (0.9999) : sin;
+
+// with environment example (dirac in feedback in sin)
+//where out ~ _ returns to itself.
+function_with(input1, input2) = out ~ _ : sin
+    	with{  
+     		section1 = (1 - 1') * input1;
+     		section2(argument1) = (argument1 * input2) + section1;
+     		out = section2;
+     	};
+//process = function_with(1000, 0.9999);
+
+// letrec function 
+function_letrec = sin(y)
+// letrec definition 
+	letrec { 
+ 		'y = dirac * damp + amp * y; 
+ 	} 
+ 	// inside the letrec function 
+    with { 
+        dirac = (1 - 1');
+        damp = 1000;
+        amp = 0.9999;
+    }; 
+//process = function_letrec <: si.bus(2); 
+
+// milliseconds to samples conversion
+milliseconds = 10;
+msec2samps(msec) = msec * (ma.SR/1000);
+//process = msec2samps(milliseconds);
+
+// dirac delayed
+//process = (_ + (1 - 1')) ~ _ @2;
+
+// dirac delayed + phase alignment
+delSampsDirac0 = 2;
+//process = (_ + (1 - 1')) ~ _@(delSampsDirac0 - 1);
+
+// dirac delayed + phase alignment (final)
+delSampsDirac1 = 2;
+//process = (_ + (1 - 1')) ~ _@(delSampsDirac1 - 1) : mem;
