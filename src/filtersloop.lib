@@ -74,8 +74,8 @@ lp1p02(fc, x) = y0 ~ _
 //process = no.noise : lp1p02(100);
 
 // onepole in seconds or smooth function
-opsec(sec, x) = lp1p0(1 / sec, x);
-//process = opsec(1, no.noise);
+opsec0(sec, x) = lp1p0(1 / sec, x);
+//process = no.noise : opsec0(1);
 
-smooth(sec, x) = lp1p0(1 / sec, x);
-//process = smooth(1, no.noise);
+smooth0(sec, x) = lp1p0(1 / sec, x);
+//process = no.noise : smooth0(1);
