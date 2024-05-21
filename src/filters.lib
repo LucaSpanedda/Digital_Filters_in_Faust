@@ -1,38 +1,8 @@
 /*******************************************************************************
-* CONSTANTS VALUES
+* DIGITAL FILTERS
 *******************************************************************************/
 import("stdfaust.lib");
 
-
-// EPSILON = 2.2204460492503131e-016;
-EPS = ma.EPSILON;
-// PI = 3.141592653589793238462643383279502884197169399375105820974944592307816406;
-PI = ma.PI;
-// TWO PI
-TWOPI = 2.0 * PI;
-// MAX SAMPLE RATE
-SRMAX = 192000;
-// CURRENT SAMPLE RATE
-SR = ma.SR;
-// NYQUIST FREQUENCY AT CURRENT SAMPLE RATE
-NY = SR / 2.0;
-// 1 SAMPLE IN SECONDS
-T = 1.0 / SR;
-// T IN PI
-PIT = PI * T;
-// T IN TWOPI
-TWOPIT = TWOPI * T;
-// HIGHEST NUMBER : MAX = 1.7976931348623158e+308;
-MAX = ma.MAX;
-// LOWEST NUMBER : MIN = 2.2250738585072014e-308;
-MIN = ma.MIN;
-// HIGHEST UDIBLE RANGE
-HUR = 20000;
-
-
-/*******************************************************************************
-* DIGITAL FILTERS
-*******************************************************************************/
 
 // onezero, g = give amplitude 0 to +/- 1 (open - close) to the delayed signal 
 oz(b1) = _ <: (_ : mem * b1), _ :> +; 
@@ -54,13 +24,13 @@ dcblocker = _ : oz(-1) : pole(0.998);
 lp1p(fc) = _ * g : + ~ * (1 - g)
     with{
         k(x) = x / (1.0 + x);
-        g = tan(fc * PI / SR) : k;
+        g = tan(fc * ma.PI / SR) : k;
     };
 //process = lp1p;
 
 lp1p2(fc) = _ * (1 - b1) : + ~ * (b1)
       with {
-           b1 = exp((fc * PI / SR) * -1);
+           b1 = exp((fc * ma.PI / ma.SR) * -1);
       };
 //process = lp1p2;
 
@@ -68,7 +38,7 @@ lp1p2(fc) = _ * (1 - b1) : + ~ * (b1)
 opsec(sec) = _ * g : + ~ * (1 - g)
     with{
         k(x) = x / (1.0 + x);
-        g = tan((1 / sec) * PI / SR) : k;
+        g = tan((1 / sec) * ma.PI / ma.SR) : k;
     };
 //process = opsec;
 
@@ -135,7 +105,7 @@ BPBWSVFTPT(BW, CF, x) = BPSVF(clip(20000, EPS, (CF / BW)), CF, x);
 // Bandpass Bandwidth SVF
 BPTPTOptimized(gf, bw, cf, x) = loop ~ si.bus(2) : (! , ! , _ * gf)
 with {
-    g = tan(cf * ma.PI * (1.0/ma.SR));
+    g = tan(cf * ma.PI * (1.0 / ma.SR));
     Q = cf / max(ma.EPSILON, bw);
     R = 1.0 / (Q + Q);
     G = 1.0 / (1.0 + 2.0 * R * g + g * g);
@@ -337,7 +307,7 @@ with{
     rangeN = maxN - minN;
     step = rangeN / rows;
     primesNum(i) = ba.take(i, primes);
-    ms2samp(t) = (t / 1000) * SR;
+    ms2samp(t) = (t / 1000) * ma.SR;
     APF(del, g, x) = x : (+ : _ <: @(del  - 1), *(g))~ *(-g) : mem, _ : + : _;
     APFgrid = 
         par(j, columns, 
