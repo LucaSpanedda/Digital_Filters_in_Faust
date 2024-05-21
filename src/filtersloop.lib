@@ -1,0 +1,81 @@
+/*******************************************************************************
+* DIGITAL FILTERS - WITH - CYCLE LOGIC
+*******************************************************************************/
+import("stdfaust.lib");
+
+
+// onezero, g = give amplitude 0 to +/- 1 (open - close) to the delayed signal 
+oz0(b, x) = y0 ~ _ : (!, _)
+    with{
+        b1 = b;
+        y0(x1) = x0, y
+            with{
+                x0 = x;
+                y = x1 * b1 + x;
+            };
+    };
+//process = no.noise : oz0(1);
+
+// onepole, g = give amplitude 0 to +/- 1 (open - close) to the delayed signal 
+op0(b, x) = y0 ~ _ 
+    with{
+        b0 = 1 - abs(b);
+        b1 = b;
+        y0(x1) = y
+            with{
+                x0 = x * b0;
+                y = x0 + x1 * b1;
+            };
+    };
+//process =  no.noise : op0(0.99);
+
+// only the pole section
+pole0(b, x) = y0 ~ _ 
+    with{
+        b1 = b;
+        y0(x1) = y
+            with{
+                x0 = x;
+                y = x0 + x1 * b1;
+            };
+    };
+//process = no.noise <: pole0(0.99);
+
+// dc blocker - https://ccrma.stanford.edu/~jos/fp/DC_Blocker.html
+dcblocker0 = _ : oz0(-1) : pole0(0.998);
+//process = 1 : dcblocker0;
+
+// onepole with frequency cut formula (chamberlin), fc = Hz
+lp1p0(fc, x) = y0 ~ _ 
+    with{
+        k(x) = x / (1.0 + x);
+        g = tan(fc * ma.PI / ma.SR) : k;
+        b0 = g;
+        b1 = 1 - g;
+        y0(x1) = y
+            with{
+                x0 = x * b0;
+                y = x0 + x1 * b1;
+            };
+    };
+//process = no.noise : lp1p0(100);
+
+lp1p02(fc, x) = y0 ~ _ 
+    with{
+        g = exp((fc * ma.PI / ma.SR) * -1);
+        b0 = 1 - g;
+        b1 = g;
+        y0(x1) = y
+            with{
+                x0 = x * b0;
+                y = x0 + x1 * b1;
+            };
+    };
+//process = no.noise : lp1p02(100);
+
+// onepole in seconds or smooth function
+opsec(sec, x) = lp1p0(1 / sec, x);
+//process = opsec(1, no.noise);
+
+smooth(sec, x) = lp1p0(1 / sec, x);
+//process = smooth(1, no.noise);
