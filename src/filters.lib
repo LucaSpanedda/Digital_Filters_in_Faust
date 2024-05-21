@@ -24,7 +24,7 @@ dcblocker = _ : oz(-1) : pole(0.998);
 lp1p(fc) = _ * g : + ~ * (1 - g)
     with{
         k(x) = x / (1.0 + x);
-        g = tan(fc * ma.PI / SR) : k;
+        g = tan(fc * ma.PI / ma.SR) : k;
     };
 //process = lp1p;
 
