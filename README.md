@@ -331,18 +331,7 @@ In this case, simply concatenating a delay line in series will suffice.
     there is a general amplitude control ```* outgain```
     on the output function onezeroout
     
-```
- // import Standard Faust library 
- // https://github.com/grame-cncm/faustlibraries/ 
- import("stdfaust.lib"); 
-  
-  
- // (G,x) = x=input, G=give amplitude 0-1(open-close) to the delayed signal 
- OZF(G,x) = (x:mem*G), x :> +; 
-  
- // out 
- process = OZF(0.1); 
-```
+https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/dd03e587744af2f6861e28327ff4ff22f335e484/src/filters.lib#L7C1-L9C16
 
 ### ONEPOLE FILTER (1st Order IIR)
 
