@@ -364,6 +364,7 @@ import("stdfaust.lib");
 opf(g, x) = x * g : + ~ (_ : * (1 - g));
 process = _ : opf(0.1);
 ```
+![https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/main/docs/op.svg](docs/op.svg)
 
 and OPF with a Frequency Cut transfer function:
 
