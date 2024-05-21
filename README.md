@@ -366,38 +366,6 @@ same OPF with Formulae expressed in Seconds (1 / FC)
 (3)
 https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/50e95f55faeda375528a3362a5074a53e76b4a3c/src/filters.lib#L37-L43
 
-### ONEPOLE Topology Preserving Transforms (TPT)
-
-TPT version of the One-Pole Filter by Vadim Zavalishin
-reference: 
-https://www.native-instruments.de/fileadmin/redaktion_upload/pdf/KeepTopology.pdf
-
-the topology-preserving transform approach, can be considered as
-a generalization of bilinear transform, zero-delay feedback and trapezoidal integration methods. This results in digital filters having nice amplitude and phase
-responses, nice time-varying behavior and plenty of options for nonlinearities
-
-```
-// import Standard Faust library 
- // https://github.com/grame-cncm/faustlibraries/ 
- import("stdfaust.lib"); 
-  
- OnepoleTPT(CF,x) = circuit ~ _ : ! , _ 
-     with { 
-         g = tan(CF * ma.PI / ma.SR); 
-         G = g / (1.0 + g); 
-         circuit(sig) = u , lp 
-             with { 
-                 v = (x - sig) * G; 
-                 u = v + lp; 
-                 lp = v + sig; 
-             }; 
-     }; 
-  
- // out 
- process = OnepoleTPT(100);
-```
-
-
 ### FEEDFORWARD COMB FILTER (Nth Order FIR)
 
 ```_``` represents the input signal, (```_``` denotes the signal)
@@ -412,15 +380,8 @@ the delayed signal has a feedforward amplitude control ```* feedforward```
 there is a general amplitude control ```* outgain```
 on the output function onezeroout
 
-```
-// import Standard Faust library 
-// https://github.com/grame-cncm/faustlibraries/ 
-import("stdfaust.lib"); 
-  
- // (t,g) = delay time in samples, filter gain 0-1 
- ffcf(t, g, x) = (x@(t) * g), x :> +; 
- process = _ * .1 : ffcf(100, 1); 
-```
+https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/50e95f55faeda375528a3362a5074a53e76b4a3c/src/filters.lib#L48-L50
+![https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/main/docs/ffcf.svg](docs/ffcf.svg)
 
 ### FEEDBACK COMB FILTER (Nth Order IIR)
 
@@ -437,20 +398,8 @@ hence ```delaysamples-1```.
 there is a general amplitude control ```* outgain```
 on the output function combfeedbout
 
-```
-// import Standard Faust library 
- // https://github.com/grame-cncm/faustlibraries/ 
- import("stdfaust.lib"); 
-  
- // Feedback Comb Filter. FBComb(Del,G,signal)  
- // (Del, G) = DEL=delay time in samples. G=feedback gain 0-1 
- fbcf(del, g, x) = loop ~ _  
-     with { 
-         loop(y) = x + y@(del - 1) * g; 
-     }; 
-  
- process = _ * .1 : fbcf(4480, .9); 
-```
+https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/50e95f55faeda375528a3362a5074a53e76b4a3c/src/filters.lib#L52-L54
+![https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/main/docs/fbcf.svg](docs/fbcf.svg)
 
 ### Lowpass FEEDBACK COMB FILTER (Nth Order IIR)
 
@@ -461,24 +410,9 @@ similar to the comb filter, but within the feedback,
     In the feedback, one sample of delay is already present by default,
     hence ```delaysamples-1```.
 
-```
-// import Standard Faust library 
-// https://github.com/grame-cncm/faustlibraries/ 
-import("stdfaust.lib"); 
-  
- // LPFBC(Del, FCut) = give: delay samps, -feedback gain 0-1-, lowpass Freq.Cut HZ 
- lpfbcf(del, cf, x) = loop ~ _ : !, _ 
-     with { 
-         onepole(CF, x) = loop ~ _  
-             with{ 
-                 g(x) = x / (1.0 + x); 
-                 G = tan(CF * ma.PI / ma.SR):g; 
-                 loop(y) = x * G + (y * (1 - G)); 
-             }; 
-         loop(y) = x + y@(del - 1) <: onepole(cf), _; 
-     }; 
- process = _ * .1 : lpfbcf(2000, 10000);
-```
+https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/50e95f55faeda375528a3362a5074a53e76b4a3c/src/filters.lib#L60-L62
+![https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/main/docs/lbcf.svg](docs/lbcf.svg)
+![https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/main/docs/lbcf-lp1p.svg](docs/lbcf-lp1p.svg)
 
 ### ALLPASS FILTER
 
@@ -492,39 +426,15 @@ from the sum of a comb IIR and a comb FIR in opposition of phase, emerge a recur
         To maintain the delay threshold of the value delaysamples,
         a mem delay (of the subtracted sample) is added
         at the end.
-        
-```
-// import Standard Faust library 
-// https://github.com/grame-cncm/faustlibraries/ 
-import("stdfaust.lib"); 
-  
- // (t, g) = give: delay in samples, feedback gain 0-1 
- apf(del, g, x) = x : (+ : _ <: @(del-1), *(g)) ~ *(-g) : mem, _ : + : _; 
- process = _ * .1 <: apf(100, .5); 
-```
+
+https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/50e95f55faeda375528a3362a5074a53e76b4a3c/src/filters.lib#L56-L58
+![https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/main/docs/apf.svg](docs/apf.svg)
 
 ### MODULATED ALLPASS FILTER
 
 Allpass Filter with Time-Variant delay
 
-```
-// import Standard Faust library 
-// https://github.com/grame-cncm/faustlibraries/ 
-import("stdfaust.lib"); 
-  
- // Modulated Allpass filter 
- ModAPF(delsamples, samplesmod, freqmod, apcoeff) = ( + : _ <:  
-     delayMod(delsamples, samplesmod, freqmod), 
-     * (apcoeff))~ * (-apcoeff) : mem, _ : + : _ 
-     with{ 
-         delayMod(samples, samplesMod, freqMod, x) = delay 
-         with{ 
-             unipolarMod(f, samples) = ((os.osc(f) + 1) / 2) * samples; 
-             delay = x : de.fdelay(samples, samples - unipolarMod(freqMod, samplesMod)); 
-         }; 
-     }; 
- process = 1-1' : +@(ma.SR/100) ~ _ <: _, ModAPF(1000, 500, .12, .5); 
-```
+https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/50e95f55faeda375528a3362a5074a53e76b4a3c/src/filters.lib#L321-L332
 
 ### STATE VARIABLE FILTER (SVF)
 
@@ -538,169 +448,21 @@ This filter transfer functions were derived from analog prototypes (that
 are shown below for each EQ filter type) and had been digitized using the
 Bilinear Transform by Robert Bristow-Johnson: https://webaudio.github.io/Audio-EQ-Cookbook/audio-eq-cookbook.html
 
-```
-// import Standard Faust library 
-// https://github.com/grame-cncm/faustlibraries/ 
-import("stdfaust.lib");
+https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/50e95f55faeda375528a3362a5074a53e76b4a3c/src/filters.lib#L141-L239
+![https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/main/docs/biquad.svg](docs/biquad.svg)
 
-// Robert Bristow-Johnson's Biquad Filter - Direct Form 1
-// https://webaudio.github.io/Audio-EQ-Cookbook/audio-eq-cookbook.html
-biquadFilter(a0, a1, a2, b1, b2) = biquadFilter
-    with{
-        biquadFilter =  _ <: _, (mem  <: (_, mem)) : (_ * a0, _ * a1, _ * a2) :> _ : 
-                        ((_, _) :> _) ~ (_ <: (_, mem) : (_ * -b1, _ * -b2) :> _);
-    };
+### ONEPOLE Topology Preserving Transforms (TPT)
 
+TPT version of the One-Pole Filter by Vadim Zavalishin
+reference: 
+https://www.native-instruments.de/fileadmin/redaktion_upload/pdf/KeepTopology.pdf
 
-// Robert Bristow-Johnson's Biquad Filter - Coefficents
+the topology-preserving transform approach, can be considered as
+a generalization of bilinear transform, zero-delay feedback and trapezoidal integration methods. This results in digital filters having nice amplitude and phase
+responses, nice time-varying behavior and plenty of options for nonlinearities
 
-// Functions for the filter
-// Angular Frequency formula
-omega(x) = (2 * ma.PI * x) / ma.SR;
-// Angular Frequency in the sine domain
-sn(x) = sin(omega(x));
-// Angular Frequency in the cosine domain
-cs(x) = cos(omega(x)); 
-// Alpha
-alpha(cf, q) = sin(omega(cf)) / (2 * q);
-
-// Lowpass Filter
-LPF = a0, a1, a2, b1, b2, _
-with{
-    cf = 100;
-    q = 0.707;
-    b0 = (1 + alpha(cf, q));
-    a0 = ((1 - cs(cf)) / 2) / b0;
-    a1 = (1 - cs(cf)) / b0;
-    a2 = ((1 - cs(cf)) / 2) / b0;
-    b1 = (-2 * cs(cf)) / b0;
-    b2 = (1 - alpha(cf, q)) / b0;
-};
-
-// Highpass filter
-HPF = a0, a1, a2, b1, b2, _
-with{
-    cf = 10000;
-    q = 0.007;
-    b0 = (1 + alpha(cf, q));
-    a0 = ((1 + cs(cf)) / 2) / b0;
-    a1 = (-1 * (1 + cs(cf))) / b0;
-    a2 = ((1 + cs(cf)) / 2) / b0;
-    b1 = (-2 * cs(cf)) / b0;
-    b2 = (1 - alpha(cf, q)) / b0;
-};
-
-// Bandpass Filter
-BPF = a0, a1, a2, b1, b2, _
-with{
-    cf = 10000;
-    q = 1000;
-    b0 = 1 + alpha(cf, q);
-    a0 = alpha(cf, q) / b0;
-    a1 = 0;
-    a2 = - alpha(cf, q) / b0;
-    b1 = (-2 * cs(cf)) / b0;
-    b2 = (1 - alpha(cf, q)) / b0;
-};
-
-// Notch filter
-NOTCH = a0, a1, a2, b1, b2, _
-with{
-    cf = 10000;
-    q = 0.1;
-    b0 = 1 + alpha(cf, q);
-    a0 = 1 / b0;
-    a1 = (-2 * cs(cf)) / b0;
-    a2 = 1 / b0;
-    b1 = (-2 * cs(cf)) / b0;
-    b2 = (1 - alpha(cf, q)) / b0;
-};
-
-// Peaking EQ filter
-PEAK = a0, a1, a2, b1, b2, _
-with{
-    cf = 10000;
-    q = 100;
-    A = 10;
-    b0 = 1 + (alpha(cf, q) / A);
-    a0 = (1 + (alpha(cf, q) * A)) / b0;
-    a1 = (-2 * cs(cf)) / b0;
-    a2 = (1 - (alpha(cf, q) * A)) / b0;
-    b1 = (-2 * cs(cf)) / b0;
-    b2 = (1 - (alpha(cf, q) / A)) / b0;
-};
-
-// Low Shelf Filter
-LSF = a0, a1, a2, b1, b2, _
-with{
-    cf = 10000;
-    q = 1;
-    //dbGain 20;
-    A  = pow(10, -20 /40);
-    beta = sqrt(A + A);
-    b0 = (A + 1) + (A - 1) * cs(cf) + beta * alpha(cf, q);
-    a0 = (A * ((A + 1) - (A - 1) * cs(cf) + beta * alpha(cf, q))) /b0;
-    a1 = (2 * A * ((A - 1) - (A + 1) * cs(cf))) / b0;
-    a2 = (A * ((A + 1) - (A - 1) * cs(cf) - beta * alpha(cf, q))) /b0;
-    b1 = (-2 * ((A - 1) + (A + 1) * cs(cf))) / b0;
-    b2 = ((A + 1) + (A - 1) * cs(cf) - beta * alpha(cf, q)) / b0;
-};
-
-// High Shelf Filter
-HSF = a0, a1, a2, b1, b2, _
-with{
-    cf = 10000;
-    q = 1;
-    //dbGain 20;
-    A  = pow(10, -20 /40);
-    beta = sqrt(A + A);
-    b0 = (A + 1) - (A - 1) * cs(cf) + beta * alpha(cf, q);
-    a0 = (A * ((A + 1) + (A - 1) * cs(cf) + beta * alpha(cf, q))) /b0;
-    a1 = (2 * A * ((A - 1) + (A + 1) * cs(cf))) / b0;
-    a2 = (A * ((A + 1) + (A - 1) * cs(cf) - beta * alpha(cf, q))) /b0;
-    b1 = (2 * ((A - 1) - (A + 1) * cs(cf))) / b0;
-    b2 = ((A + 1) - (A - 1) * cs(cf) - beta * alpha(cf, q)) / b0;
-};
-
-process = no.noise : HSF : biquadFilter;
-```
+https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/50e95f55faeda375528a3362a5074a53e76b4a3c/src/filters.lib#L246-L263
 
 ### Vadim Zavalishin's SVF Topology Preserving Transform
 
-```
-s// import Standard Faust library 
-// https://github.com/grame-cncm/faustlibraries/ 
-import("stdfaust.lib"); 
-
-// Vadim Zavalishin's SVF TPT filter (Topology Preserving Transform)
-SVFTPT(Q, cf, x) = loop ~ si.bus(2) : (! , ! , _ , _ , _ , _ , _)
-    with {
-        g = tan(cf * ma.PI * ma.T);
-        R = 1.0 / (2.0 * Q);
-        G1 = 1.0 / (1.0 + 2.0 * R * g + g * g);
-        G2 = 2.0 * R + g;
-        loop(s1, s2) = u1 , u2 , lp , hp , bp * 2.0 * R , x - bp * 4.0 * R , bp
-            with {
-                hp = (x - s1 * G2 - s2) * G1;
-                v1 = hp * g;
-                bp = s1 + v1;
-                v2 = bp * g;
-                lp = s2 + v2;
-                u1 = v1 + bp;
-                u2 = v2 + lp;
-            };
-    };
-
-// HP - LP SVF 
-LPSVFTPT(Q, cf, x) = SVFTPT(Q, cf, x) : (_ , ! , ! , ! , !);
-HPSVFTPT(Q, cf, x) = SVFTPT(Q, cf, x) : (! , _ , ! , ! , !);
-
-// Normalized Bandpass SVF 
-BPSVFTPT(Q, cf, x) = SVFTPT(Q, cf, x) : (! , ! , _ , ! , !);
-process = BPSVFTPT(1, 1000);
-
-NotchSVFTPT(Q, cf, x) = x - BPSVF(Q, cf, x);
-APSVFTPT(Q, cf, x) = SVFTPT(Q, cf, x) : (! , ! , ! , _ , !);
-PeakingSVFTPT(Q, cf, x) = LPSVF(Q, cf, x) - HPSVF(Q, cf, x);
-BP2SVFTPT(Q, cf, x) = SVFTPT(Q, cf, x) : (! , ! , ! , ! , _);
-```
+https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/50e95f55faeda375528a3362a5074a53e76b4a3c/src/filters.lib#L69-L101
