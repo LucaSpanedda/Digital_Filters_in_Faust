@@ -7,6 +7,7 @@ In FAUST the ```_``` represent a signal input.
 A function with one input that goes directly to the output is written as follows: 
 
 https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/c25f64f7c165c10aa0ca5c4e0edea73a7aedd898/src/examples.lib#L4-L8
+![https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/main/docs/signal.svg](docs/signal.svg)
 
 ---
 where
@@ -21,17 +22,20 @@ Faust provides us with three different syntaxes to express a delay line:
   signal of this program
 
   https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/c25f64f7c165c10aa0ca5c4e0edea73a7aedd898/src/examples.lib#L10-L11
+  ![https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/main/docs/memmem.svg](docs/memmem.svg)
 
   will produce a delayed signal of two samples.
-
+  
   ---
 
 - ```mem``` - indicates a 1 sample delay. You can use the "mem" successively add delay samples, so 
   the output signal of this program
 
   https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/c25f64f7c165c10aa0ca5c4e0edea73a7aedd898/src/examples.lib#L13-L14
-
+  
   will produce a delayed signal of two samples.
+  
+  These last two programs produce the same result.
 
   ---
 
@@ -39,7 +43,8 @@ Faust provides us with three different syntaxes to express a delay line:
   samples of delay is written like:
   
   https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/c25f64f7c165c10aa0ca5c4e0edea73a7aedd898/src/examples.lib#L16-L17
-
+  ![https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/main/docs/del196000.svg](docs/del196000.svg)
+  
 ### Dirac impulse
 Now, another element that we can introduce through the filter syntax is the Dirac impulse, 
 which represents our minimum DSP unit, namely the single sample
@@ -49,6 +54,7 @@ but doing it at a delayed sample.
 Example:
 
 https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/c25f64f7c165c10aa0ca5c4e0edea73a7aedd898/src/examples.lib#L19-L21
+![https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/main/docs/dirac.svg](docs/dirac.svg)
 
 or something like that using functional syntax:
 
@@ -73,6 +79,7 @@ Now we will illustrate three main methods for Implementing Recursive Circuits in
   In this program, the input is summed with itself delayed by one sample and multiplied by 0.5:
   
   https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/c25f64f7c165c10aa0ca5c4e0edea73a7aedd898/src/examples.lib#L27-L28
+  ![https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/main/docs/feedback.svg](docs/feedback.svg)
 
   ---
   
@@ -89,6 +96,7 @@ Now we will illustrate three main methods for Implementing Recursive Circuits in
   Example:
   
   https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/c25f64f7c165c10aa0ca5c4e0edea73a7aedd898/src/examples.lib#L30-L38
+  ![https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/main/docs/feedbackwith.svg](docs/feedbackwith.svg)
 
   Moreover, with in Faust allows declaring variables
   that are not pointed to from outside the code but only
@@ -104,6 +112,7 @@ Now we will illustrate three main methods for Implementing Recursive Circuits in
   recurrence equations are written.
   
   https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/c25f64f7c165c10aa0ca5c4e0edea73a7aedd898/src/examples.lib#L40-L52
+  ![https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/main/docs/feedbackletrec.svg](docs/feedbackletrec.svg)
 
 ---
 
@@ -120,6 +129,7 @@ This program takes input time expressed in milliseconds
 and returns the value in samples.
 
 https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/c25f64f7c165c10aa0ca5c4e0edea73a7aedd898/src/examples.lib#L54-L57
+![https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/main/docs/ms2samps.svg](docs/ms2samps.svg)
 
 Through ```ma.SR```, we use the current sampling frequency of 
 the machine we are using.
@@ -181,6 +191,7 @@ We need to spend a few words about the implementation of a delay line in feedbac
 In the following program, we have a Dirac impulse that is summed by itselfs delayed by 2 samples.
 
 https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/c25f64f7c165c10aa0ca5c4e0edea73a7aedd898/src/examples.lib#L59-L60
+![https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/main/docs/phasealignment0.svg](docs/phasealignment0.svg)
 
 We expect these values to appear in the first 10 samples:
 
@@ -221,6 +232,7 @@ delay line, when applied, costs by default one sample delay.
 So one must consider that the number of delay samples equals the number of samples minus 1:
 
 https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/c25f64f7c165c10aa0ca5c4e0edea73a7aedd898/src/examples.lib#L62-L64
+![https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/main/docs/phasealignment1.svg](docs/phasealignment1.svg)
 
 ---
 
@@ -228,6 +240,7 @@ In some application scenarios later on, we'll need a one-sample delay even at th
 In this case, simply concatenating a delay line in series will suffice.
 
 https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/c25f64f7c165c10aa0ca5c4e0edea73a7aedd898/src/examples.lib#L66-L68
+![https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/main/docs/phasealignment2.svg](docs/phasealignment2.svg)
 
 ## Digital Filters
 
