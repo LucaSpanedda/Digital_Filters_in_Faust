@@ -332,6 +332,7 @@ In this case, simply concatenating a delay line in series will suffice.
     on the output function onezeroout
     
 https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/50e95f55faeda375528a3362a5074a53e76b4a3c/src/filters.lib#L7-L9
+![https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/main/docs/oz.svg](docs/oz.svg)
 
 ### ONEPOLE FILTER (1st Order IIR)
 
@@ -344,53 +345,26 @@ https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/50e95f55faeda37552
     there is a general amplitude control ```* outgain```
     on the output function onezeroout
 
-```
-// import Standard Faust library 
-// https://github.com/grame-cncm/faustlibraries/ 
-import("stdfaust.lib");
-
-// (g) = give amplitude 1-0(open-close) for the lowpass cut
-opf(g, x) = x * g : + ~ (_ : * (1 - g));
-process = _ : opf(0.1);
-```
+https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/50e95f55faeda375528a3362a5074a53e76b4a3c/src/filters.lib#L11-L13
 ![https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/main/docs/op.svg](docs/op.svg)
 
-and OPF with a Frequency Cut transfer function:
+and OPF with Frequency Cut transfer functions:
 
-```
-// import Standard Faust library 
-// https://github.com/grame-cncm/faustlibraries/ 
-import("stdfaust.lib"); 
-  
- // (G)  = give amplitude 1-0 (open-close) for the lowpass cut 
- // (CF) = Frequency Cut in HZ 
- OPF(CF,x) = OPFFBcircuit ~ _  
-     with{ 
-         g(x) = x / (1.0 + x); 
-         G = g(tan(CF * ma.PI / ma.SR)); 
-         OPFFBcircuit(y) = x * G + (y * (1 - G)); 
-         }; 
-  
- process = _ : OPF(20000) <: si.bus(2);
-```
-same OPF with Formulae expressed in Seconds
+(1)
+https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/50e95f55faeda375528a3362a5074a53e76b4a3c/src/filters.lib#L23-L29
+![https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/main/docs/lp1p.svg](docs/lp1p.svg)
+![https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/main/docs/lp1p-g.svg](docs/lp1p-g.svg)
+![https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/main/docs/lp1p-k.svg](docs/lp1p-k.svg)
 
-```
-// import Standard Faust library 
-// https://github.com/grame-cncm/faustlibraries/ 
-import("stdfaust.lib"); 
-  
- // (G)  = give amplitude 1-0 (open-close) for the lowpass cut 
- // (T) = Frequency in Seconds
- OPF(T, x) = OPFFBcircuit ~ _  
-     with{ 
-         g(x) = x / (1.0 + x); 
-         G = g(tan((1 / T) * ma.PI / ma.SR)); 
-         OPFFBcircuit(y) = x * G + (y * (1 - G)); 
-         }; 
-  
- process = _ : OPF(10) <: si.bus(2);
-```
+(2)
+https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/50e95f55faeda375528a3362a5074a53e76b4a3c/src/filters.lib#L31-L35
+![https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/main/docs/lp1p2.svg](docs/lp1p2.svg)
+![https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/main/docs/lp1p2-b1.svg](docs/lp1p2-b1.svg)
+
+same OPF with Formulae expressed in Seconds (1 / FC)
+
+(3)
+https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/50e95f55faeda375528a3362a5074a53e76b4a3c/src/filters.lib#L37-L43
 
 ### ONEPOLE Topology Preserving Transforms (TPT)
 
