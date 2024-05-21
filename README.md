@@ -331,7 +331,7 @@ In this case, simply concatenating a delay line in series will suffice.
     there is a general amplitude control ```* outgain```
     on the output function onezeroout
     
-https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/dd03e587744af2f6861e28327ff4ff22f335e484/src/filters.lib#L7C1-L9C16
+https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/50e95f55faeda375528a3362a5074a53e76b4a3c/src/filters.lib#L7-L9
 
 ### ONEPOLE FILTER (1st Order IIR)
 
