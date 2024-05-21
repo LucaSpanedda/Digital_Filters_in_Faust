@@ -8,9 +8,10 @@ A function with one input that goes directly to the output is written as follows
 
 https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/c25f64f7c165c10aa0ca5c4e0edea73a7aedd898/src/examples.lib#L4-L8
 
+---
 where
 ```process``` is the ***main*** function in Faust (the compiler's output function).
-and 
+And 
 ```import("stdfaust.lib");``` is the function for import the Standard Faust Libraries.
 ---
 
@@ -18,39 +19,26 @@ Faust provides us with three different syntaxes to express a delay line:
 
 - ```'``` - is used to express a one sample delay. Time expressions can be chained, so the output 
   signal of this program
-  ```
-   // import Standard Faust library 
-   // https://github.com/grame-cncm/faustlibraries/ 
-   import("stdfaust.lib");
 
-   process = _''';
-  ```
-  will produce a delayed signal of three samples.
+  https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/c25f64f7c165c10aa0ca5c4e0edea73a7aedd898/src/examples.lib#L10-L11
+
+  will produce a delayed signal of two samples.
 
   ---
 
 - ```mem``` - indicates a 1 sample delay. You can use the "mem" successively add delay samples, so 
   the output signal of this program
-  ```
-   // import Standard Faust library 
-   // https://github.com/grame-cncm/faustlibraries/ 
-   import("stdfaust.lib");
 
-   process = _ : mem : mem : _;
-  ```
+  https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/c25f64f7c165c10aa0ca5c4e0edea73a7aedd898/src/examples.lib#L13-L14
+
   will produce a delayed signal of two samples.
 
   ---
 
 - ```@``` - indicates a number of variable delay samples, so for example a signal with 192000 
   samples of delay is written like:
-  ```
-   // import Standard Faust library 
-   // https://github.com/grame-cncm/faustlibraries/ 
-   import("stdfaust.lib");
-
-   process = _ @ 192000;
-  ```
+  
+  https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/c25f64f7c165c10aa0ca5c4e0edea73a7aedd898/src/examples.lib#L16-L17
 
 ### Dirac impulse
 Now, another element that we can introduce through the filter syntax is the Dirac impulse, 
@@ -59,25 +47,13 @@ by putting a number 1 and subtracting the same value from it
 but doing it at a delayed sample.
 
 Example:
-```
- // import Standard Faust library 
- // https://github.com/grame-cncm/faustlibraries/ 
- import("stdfaust.lib"); 
-  
- // Dirac Impulse with delay lines - Impulse at Compile Time 
- dirac = 1 - 1'; 
- process = dirac; 
-```
+
+https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/c25f64f7c165c10aa0ca5c4e0edea73a7aedd898/src/examples.lib#L19-L21
+
 or something like that using functional syntax:
-```
- // import Standard Faust library 
- // https://github.com/grame-cncm/faustlibraries/ 
- import("stdfaust.lib"); 
-  
- // Dirac Impulse with delay lines - Impulse at Compile Time 
- dirac(x) = x - x'; 
- process = dirac(1); 
-```
+
+https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/c25f64f7c165c10aa0ca5c4e0edea73a7aedd898/src/examples.lib#L23-L25
+
 These last two programs produce the same result.
 
 ### Methods for Implementing Recursive Circuits in the Faust Language
@@ -95,13 +71,8 @@ Now we will illustrate three main methods for Implementing Recursive Circuits in
   will point to the input before the parenthesis.
 
   In this program, the input is summed with itself delayed by one sample and multiplied by 0.5:
-  ```
-  /// import Standard Faust library 
-  // https://github.com/grame-cncm/faustlibraries/ 
-  import("stdfaust.lib"); 
-
-  process = 1000-1000' : (_ + _) ~ _ * (0.9999) : sin;
-  ```
+  
+  https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/c25f64f7c165c10aa0ca5c4e0edea73a7aedd898/src/examples.lib#L27-L28
 
   ---
   
@@ -116,21 +87,8 @@ Now we will illustrate three main methods for Implementing Recursive Circuits in
   You can find an exhaustive explanation of [with construction here](https://faustdoc.grame.fr/manual/syntax/index.html#with-expression)
   
   Example:
-  ```
-   // import Standard Faust library 
-   // https://github.com/grame-cncm/faustlibraries/ 
-   import("stdfaust.lib"); 
-
-   //where out ~ _ returns to itself.
-   function_with(input1, input2) = out ~ _
-       	with{  
-        		section1 = 2 * input1;
-        		section2(argument1) = argument1 * section1 + input2;
-        		out = section2;
-        	};
-        	
-   process = function_with(0.40, 2);
-  ```
+  
+  https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/c25f64f7c165c10aa0ca5c4e0edea73a7aedd898/src/examples.lib#L30-L38
 
   Moreover, with in Faust allows declaring variables
   that are not pointed to from outside the code but only
@@ -144,27 +102,8 @@ Now we will illustrate three main methods for Implementing Recursive Circuits in
   with this method we can write a signal
   recursively, similar to how
   recurrence equations are written.
-  ```
-   // import Standard Faust library  
-   // https://github.com/grame-cncm/faustlibraries
-   import("stdfaust.lib"); 
-   
-   // letrec function 
-   lowpass(cf, x) = y 
-   // letrec definition 
-   	letrec { 
-    		'y = b0 * x - a1 * y; 
-    	} 
-    	// inside the letrec function 
-    with { 
-         b0 = 1 + a1; 
-         a1 = exp(-w(cf)) * -1; 
-         w(f) = 2 * ma.PI * f / ma.SR; 
-    }; 
-    
-    // Output of the letrec function 
-    process = lowpass(100, no.noise) <: si.bus(2); 
-    ```
+  
+  https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/c25f64f7c165c10aa0ca5c4e0edea73a7aedd898/src/examples.lib#L40-L52
 
 ---
 
@@ -179,15 +118,9 @@ This brief preamble will be explained further in the chapter on the bilinear tra
 
 This program takes input time expressed in milliseconds 
 and returns the value in samples.
-```
- // import Standard Faust library 
- // https://github.com/grame-cncm/faustlibraries/ 
- import("stdfaust.lib");
 
- milliseconds = 10;
- msec2samps(msec) = msec * (ma.SR/1000);
- process = msec2samps(milliseconds);
-```
+https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/c25f64f7c165c10aa0ca5c4e0edea73a7aedd898/src/examples.lib#L54-L57
+
 Through ```ma.SR```, we use the current sampling frequency of 
 the machine we are using.
 
@@ -246,13 +179,8 @@ and thus a greater definition.
 We need to spend a few words about the implementation of a delay line in feedback in the digital world.
 
 In the following program, we have a Dirac impulse that is summed by itselfs delayed by 2 samples.
-```
- /// import Standard Faust library 
- // https://github.com/grame-cncm/faustlibraries/ 
- import("stdfaust.lib");
- dirac = 1-1';
- process = (_ + dirac) ~ _ @2;
-```
+
+https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/c25f64f7c165c10aa0ca5c4e0edea73a7aedd898/src/examples.lib#L59-L60
 
 We expect these values to appear in the first 10 samples:
 
@@ -291,29 +219,15 @@ delay line, when applied, costs by default one sample delay.
 '*Feedback = 1 Sample*'
 
 So one must consider that the number of delay samples equals the number of samples minus 1:
-```
- /// import Standard Faust library 
- // https://github.com/grame-cncm/faustlibraries/ 
- import("stdfaust.lib");
- dirac = 1-1';
- delSamps = 2;
- process = (_ + dirac) ~ _@(delSamps-1);
-```
+
+https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/c25f64f7c165c10aa0ca5c4e0edea73a7aedd898/src/examples.lib#L62-L64
 
 ---
 
 In some application scenarios later on, we'll need a one-sample delay even at the input signal. 
 In this case, simply concatenating a delay line in series will suffice.
 
-```
- /// import Standard Faust library 
- // https://github.com/grame-cncm/faustlibraries/ 
- import("stdfaust.lib");
- dirac = 1-1';
- delSamps = 2;
- process = (_ + dirac) ~ _@(delSamps-1) : mem;
-```
-
+https://github.com/LucaSpanedda/Digital_Filters_in_Faust/blob/c25f64f7c165c10aa0ca5c4e0edea73a7aedd898/src/examples.lib#L66-L68
 
 ## Digital Filters
 
