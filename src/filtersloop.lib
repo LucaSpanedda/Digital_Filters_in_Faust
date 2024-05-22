@@ -79,3 +79,285 @@ opsec0(sec, x) = lp1p0(1 / sec, x);
 
 smooth0(sec, x) = lp1p0(1 / sec, x);
 //process = no.noise : smooth0(1);
+
+// feedforward comb filter, (t, g) = delay time in samples, filter gain 0-1 
+ffcf0(t, b, x) = y0 ~ _ : (!, _)
+    with{
+        b1 = b;
+        y0(x1) = x0, y
+            with{
+                x0 = x @ (t - 1);
+                y = x1 * b1 + x;
+            };
+    };
+//process = no.noise : ffcf0(10, 0.9);
+
+// feedback comb filter, (t, g) = give: delay time in samples, feedback gain 0-1
+fbcf0(t, b, x) = y0 ~ _ : mem
+    with{
+        b1 = b;
+        y0(x1) = z
+            with{
+                x0 = x;
+                y = x0 + x1 * b1;
+                z = y  @ (t - 1);
+            };
+    };
+//process = no.noise : fbcf0(10, 0.9);
+
+// allpass filter, (t, g) = give: delay in samples, feedback gain 0-1
+apf0(t, b, x) = y0 ~ _ : (mem + _)
+    with{
+        b0 = b;
+        b1 = - b;
+        y0(x1) = z, v
+            with{
+                x0 = x;
+                y = x0 + x1 * b1;
+                z = y  @ (t - 1);
+                v = y * b0; 
+            };
+    };
+//process = no.noise : apf0(10, 0.9);
+
+// lowpass feedback comb filter, (t, g) = give: delay time in samples, g gain 0-1, Freq cut (HZ)
+lbcf0(t, b, fc, x) = y0 ~ _ : mem
+    with{
+        b1 = b;
+        y0(x1) = z
+            with{
+                x0 = x;
+                x2 = lp1p0(fc, x1);
+                y = x0 + x2 * b1;
+                z = y  @ (t - 1);
+            };
+    };
+//process = (1-1') : lbcf0(1000, 0.999, 10000);
+
+
+/*******************************************************************************
+* SVF : STATE VARIABLE FILTERS & TPT
+*******************************************************************************/
+
+// Vadim Zavalishin's SVF TPT filter (Topology Preserving Transform)
+SVFTPT(Q, cf, x) = loop ~ si.bus(2) : (! , ! , _ , _ , _ , _ , _)
+    with {
+        g = tan(cf * ma.PI * ma.T);
+        R = 1.0 / (2.0 * Q);
+        G1 = 1.0 / (1.0 + 2.0 * R * g + g * g);
+        G2 = 2.0 * R + g;
+        loop(s1, s2) = u1 , u2 , lp , hp , bp * 2.0 * R , x - bp * 4.0 * R , bp
+            with {
+                hp = (x - s1 * G2 - s2) * G1;
+                v1 = hp * g;
+                bp = s1 + v1;
+                v2 = bp * g;
+                lp = s2 + v2;
+                u1 = v1 + bp;
+                u2 = v2 + lp;
+            };
+    };
+
+// HP - LP SVF 
+LPSVFTPT(Q, cf, x) = SVFTPT(Q, cf, x) : (_ , ! , ! , ! , !);
+HPSVFTPT(Q, cf, x) = SVFTPT(Q, cf, x) : (! , _ , ! , ! , !);
+
+// Normalized Bandpass SVF 
+BPSVFTPT(Q, cf, x) = SVFTPT(Q, cf, x) : (! , ! , _ , ! , !);
+
+NotchSVFTPT(Q, cf, x) = x - BPSVF(Q, cf, x);
+APSVFTPT(Q, cf, x) = SVFTPT(Q, cf, x) : (! , ! , ! , _ , !);
+PeakingSVFTPT(Q, cf, x) = LPSVF(Q, cf, x) - HPSVF(Q, cf, x);
+BP2SVFTPT(Q, cf, x) = SVFTPT(Q, cf, x) : (! , ! , ! , ! , _);
+
+// Bandpass Bandwidth SVF
+BPBWSVFTPT(BW, CF, x) = BPSVF(clip(20000, EPS, (CF / BW)), CF, x);
+
+
+// Optimized BP from the TPT version of the SVF Filter by Vadim Zavalishin
+// Bandpass Bandwidth SVF
+BPTPTOptimized(gf, bw, cf, x) = loop ~ si.bus(2) : (! , ! , _ * gf)
+with {
+    g = tan(cf * ma.PI * (1.0 / ma.SR));
+    Q = cf / max(ma.EPSILON, bw);
+    R = 1.0 / (Q + Q);
+    G = 1.0 / (1.0 + 2.0 * R * g + g * g);
+    loop(s1, s2) = u1 , u2 , bp
+        with {
+            bp = (g * (x - s2) + s1) * G;
+            bp2 = bp + bp;
+            v2 = bp2 * g;
+            u1 = bp2 - s1;
+            u2 = v2 + s2;
+        };
+};
+
+// Normalized Bandpass SVF TPT
+BPTPTNormalized(gf, bw, cf, x) = loop ~ si.bus(2) : (! , ! , _ * gf)
+    with {
+        g = tan(cf * ma.PI * ma.T);
+        R = 1.0 / (2.0 * bw);
+        G1 = 1.0 / (1.0 + 2.0 * R * g + g * g);
+        G2 = 2.0 * R + g;
+        loop(s1, s2) = u1 , u2 , bp * 2.0 * R
+            with {
+                hp = (x - s1 * G2 - s2) * G1;
+                v1 = hp * g;
+                bp = s1 + v1;
+                v2 = bp * g;
+                lp = s2 + v2;
+                u1 = v1 + bp;
+                u2 = v2 + lp;
+            };
+    };
+
+// Robert Bristow-Johnson's Biquad Filter - Direct Form 1
+// https://webaudio.github.io/Audio-EQ-Cookbook/audio-eq-cookbook.html
+biquad(i, cf, q) = _ : coefficients(i) : biquadFilter
+    with{
+        biquadFilter(a0, a1, a2, b1, b2) = biquadFilter
+            with{
+                biquadFilter =  _ <: _, (mem  <: (_, mem)) : (_ * a0, _ * a1, _ * a2) :> _ : 
+                                ((_, _) :> _) ~ (_ <: (_, mem) : (_ * -b1, _ * -b2) :> _);
+            };
+
+        // Angular Frequency formula
+        omega(x) = (2 * ma.PI * x) / ma.SR;
+        // Angular Frequency in the sine domain
+        sn(x) = sin(omega(x));
+        // Angular Frequency in the cosine domain
+        cs(x) = cos(omega(x)); 
+        // Alpha
+        alpha(cf0, q0) = sin(omega(cf0)) / (2 * q0);
+
+        // Robert Bristow-Johnson's Biquad Filter - Coefficents
+        // Lowpass Filter
+        coefficients(0) = a0, a1, a2, b1, b2, _
+        with{
+            b0 = (1 + alpha(cf, q));
+            a0 = ((1 - cs(cf)) / 2) / b0;
+            a1 = (1 - cs(cf)) / b0;
+            a2 = ((1 - cs(cf)) / 2) / b0;
+            b1 = (-2 * cs(cf)) / b0;
+            b2 = (1 - alpha(cf, q)) / b0;
+        };
+        // Highpass filter
+        coefficients(1) = a0, a1, a2, b1, b2, _
+        with{
+            b0 = (1 + alpha(cf, q));
+            a0 = ((1 + cs(cf)) / 2) / b0;
+            a1 = (-1 * (1 + cs(cf))) / b0;
+            a2 = ((1 + cs(cf)) / 2) / b0;
+            b1 = (-2 * cs(cf)) / b0;
+            b2 = (1 - alpha(cf, q)) / b0;
+        };
+        // Bandpass Filter
+        coefficients(2) = a0, a1, a2, b1, b2, _
+        with{
+            b0 = 1 + alpha(cf, q);
+            a0 = alpha(cf, q) / b0;
+            a1 = 0;
+            a2 = - alpha(cf, q) / b0;
+            b1 = (-2 * cs(cf)) / b0;
+            b2 = (1 - alpha(cf, q)) / b0;
+        };
+        // Notch filter
+        coefficients(3) = a0, a1, a2, b1, b2, _
+        with{
+            b0 = 1 + alpha(cf, q);
+            a0 = 1 / b0;
+            a1 = (-2 * cs(cf)) / b0;
+            a2 = 1 / b0;
+            b1 = (-2 * cs(cf)) / b0;
+            b2 = (1 - alpha(cf, q)) / b0;
+        };
+        // Peaking EQ filter
+        coefficients(4) = a0, a1, a2, b1, b2, _
+        with{
+            A = 10;
+            b0 = 1 + (alpha(cf, q) / A);
+            a0 = (1 + (alpha(cf, q) * A)) / b0;
+            a1 = (-2 * cs(cf)) / b0;
+            a2 = (1 - (alpha(cf, q) * A)) / b0;
+            b1 = (-2 * cs(cf)) / b0;
+            b2 = (1 - (alpha(cf, q) / A)) / b0;
+        };
+        // Low Shelf Filter
+        coefficients(5) = a0, a1, a2, b1, b2, _
+        with{
+            //dbGain 20;
+            A  = pow(10, -20 /40);
+            beta = sqrt(A + A);
+            b0 = (A + 1) + (A - 1) * cs(cf) + beta * alpha(cf, q);
+            a0 = (A * ((A + 1) - (A - 1) * cs(cf) + beta * alpha(cf, q))) /b0;
+            a1 = (2 * A * ((A - 1) - (A + 1) * cs(cf))) / b0;
+            a2 = (A * ((A + 1) - (A - 1) * cs(cf) - beta * alpha(cf, q))) /b0;
+            b1 = (-2 * ((A - 1) + (A + 1) * cs(cf))) / b0;
+            b2 = ((A + 1) + (A - 1) * cs(cf) - beta * alpha(cf, q)) / b0;
+        };
+        // High Shelf Filter
+        coefficients(6) = a0, a1, a2, b1, b2, _
+        with{
+            //dbGain 20;
+            A  = pow(10, -20 /40);
+            beta = sqrt(A + A);
+            b0 = (A + 1) - (A - 1) * cs(cf) + beta * alpha(cf, q);
+            a0 = (A * ((A + 1) + (A - 1) * cs(cf) + beta * alpha(cf, q))) /b0;
+            a1 = (2 * A * ((A - 1) + (A + 1) * cs(cf))) / b0;
+            a2 = (A * ((A + 1) + (A - 1) * cs(cf) - beta * alpha(cf, q))) /b0;
+            b1 = (2 * ((A - 1) - (A + 1) * cs(cf))) / b0;
+            b2 = ((A + 1) - (A - 1) * cs(cf) - beta * alpha(cf, q)) / b0;
+        };
+};
+//process = (1000, 1, _) : biquad(0);
+
+
+/*******************************************************************************
+* TPT OP & BUTTERWORTH FILTERS
+*******************************************************************************/
+
+// Vadim Zavalishin's Onepole TPT Filter (Topology Preserving Transform) 
+onePoleTPT(cf, x) = loop ~ _ : ! , si.bus(3)
+    with {
+        g = tan(cf * PI * ma.T);
+        G = g / (1.0 + g);
+        loop(s) = u , lp , hp , ap
+            with {
+            v = (x - s) * G; u = v + lp; lp = v + s; hp = x - lp; ap = lp - hp;
+            };
+    };
+//process = onePoleTPT;
+
+// Lowpass and Highpass TPT
+LPTPT(cf, x) = onePoleTPT(cf, x) : (_ , ! , !);
+HPTPT(cf, x) = onePoleTPT(cf, x) : (! , _ , !);
+
+// Allpass TPT
+APTPT(cf, x) = onePoleTPT(cf, x) : (!, !, _);
+
+
+// BUTTERWORTH
+butterworthQ(order, stage) = qFactor(order % 2)
+    with {
+        qFactor(0) = 1.0 / (2.0 * cos(((2.0 * stage + 1) *
+        (PI / (order * 2.0)))));
+        qFactor(1) = 1.0 / (2.0 * cos(((stage + 1) * (PI / order))));
+    };
+
+LPButterworthN(1, cf, x) = LPTPT(cf, x);
+LPButterworthN(N, cf, x) = cascade(N % 2)
+    with {
+        cascade(0) = x : seq(i, N / 2, LPSVFTPT(butterworthQ(N, i), cf));
+        cascade(1) = x : LPTPT(cf) : seq(i, (N - 1) / 2,
+        LPSVFTPT(butterworthQ(N, i), cf));
+    };
+//process = (1000, no.noise) : LPButterworthN(4);
+
+HPButterworthN(1, cf, x) = HPTPT(cf, x);
+HPButterworthN(N, cf, x) = cascade(N % 2)
+    with {
+        cascade(0) = x : seq(i, N / 2, HPSVFTPT(butterworthQ(N, i), cf));
+        cascade(1) = x : HPTPT(cf) : seq(i, (N - 1) /
+        2, HPSVFTPT(butterworthQ(N, i), cf));
+    };
+//process = (1000, no.noise) : HPButterworthN(4);
